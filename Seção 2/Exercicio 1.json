@@ -1,0 +1,138 @@
+{
+  "name": "Exercicio 1",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1jxSL88hMMpGTiRorEw2kuez8Zlk0GcmPIvMfpLSirbs",
+          "mode": "list",
+          "cachedResultName": "Exercicio 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jxSL88hMMpGTiRorEw2kuez8Zlk0GcmPIvMfpLSirbs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jxSL88hMMpGTiRorEw2kuez8Zlk0GcmPIvMfpLSirbs/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ddc09d2a-5f57-4c70-8b17-b89a52af73f3",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "r69qgAE25pVjXxRQ",
+          "name": "Google Sheets Trigger OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json['descrição'] }}",
+        "emailType": "text",
+        "message": "=Olá, {{ $json.nome }} agradecemos o envio dos seus dados",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "51b0c94c-35b4-46b5-a801-3c53f0a33349",
+      "name": "Send a message",
+      "webhookId": "b57e4e66-c0af-4d05-9cba-4bc9263d91e6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uk5nTxJTQsIcY2Q2",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "familyName": "=",
+        "givenName": "={{ $('Google Sheets Trigger').item.json.nome }}",
+        "additionalFields": {
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "work",
+                "value": "={{ $('Google Sheets Trigger').item.json.email }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContacts",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "03031613-cdd9-41d9-81d9-23fac9c807ab",
+      "name": "Create a contact",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "L2KLktglSRxSs6nV",
+          "name": "Google Contacts account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Create a contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "683f425f-f98c-4fba-990f-54acbce5884b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15041d284c9cb0d5b99697e4420ff87301988633e824a6fd2035ea6f94cdd72c"
+  },
+  "id": "0u0qSovwpnrx2Uqw",
+  "tags": []
+}
