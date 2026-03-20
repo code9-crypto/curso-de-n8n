@@ -1,0 +1,6 @@
+1º baixar telegram no celular e iniciar acesso;
+2º baixar o telegram no computador;
+3º conectar app do celular no computador;
+4º entrar no link do botfather ( o qual está em PDF nesta pasta )
+
+API telegram - 8688020981:AAGkHmYNcntCv7pct1ooM7JJEPM2SeFyjGE
