@@ -1,0 +1,190 @@
+{
+  "name": "drive + shared + airtable",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "18fQsfMesknTnobmid0ZEExDaIuJDAByl",
+          "mode": "list",
+          "cachedResultName": "utensilios",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18fQsfMesknTnobmid0ZEExDaIuJDAByl"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "71b44a9e-60df-4e60-9b4d-05817d8541bf",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmIcFuCGOZE8aCef",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app7a1MCmbAAxMx7i",
+          "mode": "list",
+          "cachedResultName": "Dados n8n",
+          "cachedResultUrl": "https://airtable.com/app7a1MCmbAAxMx7i"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaFfSw0txptCTuK",
+          "mode": "list",
+          "cachedResultName": "Dados",
+          "cachedResultUrl": "https://airtable.com/app7a1MCmbAAxMx7i/tblaFfSw0txptCTuK"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID do arquivo": "={{ $('Google Drive Trigger').item.json.id }}",
+            "Data de criação": "={{ $('Google Drive Trigger').item.json.createdTime }}",
+            "Email de destino": "convidadoc38@gmail.com"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ID do arquivo",
+              "displayName": "ID do arquivo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Data de criação",
+              "displayName": "Data de criação",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email de destino",
+              "displayName": "Email de destino",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "f30c64ec-d9e4-4d70-b0ef-dc8100efc019",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "KHKwaUIVd1nk6bk9",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "writer",
+            "type": "user",
+            "emailAddress": "convidadoc38@gmail.com"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "9a38c32a-4e97-420c-aabc-02bad1cde3e9",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmIcFuCGOZE8aCef",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ead2deae-dbc7-492b-9822-e07183a5b111",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15041d284c9cb0d5b99697e4420ff87301988633e824a6fd2035ea6f94cdd72c"
+  },
+  "id": "yb67e586uSmcaVXe",
+  "tags": []
+}
