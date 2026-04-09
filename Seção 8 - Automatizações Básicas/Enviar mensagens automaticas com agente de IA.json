@@ -1,0 +1,196 @@
+{
+  "name": "Enviar mensagens automaticas com agente de IA",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "08cb1ace-2770-4883-a033-31124764c9e2",
+      "name": "When chat message received",
+      "webhookId": "1f800b61-3211-47c7-9e32-3ef34e8bf225"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "#Role\n\nVocê é um assistente pessoal de agente de IA. Sua principal função é enviar email. Você também tem acesso a duas ferramentas: contatos e enviar_mensagem.\n\n##Ferramentas\n\n1. Contatos:\nUse esta ferramenta quando você quiser procurar por uma informação de contato como endereço de email ou número de telefone. Você precisa usar isso antes de enviar um email ou antes de coletar os emails.\n\n2. enviar_mensagem:\nUse esta ferramenta para lidar com as ações relacionadas à email como enviar, ler ou encaminhar emails.\n\n- Mantenha os emails profissionais.\n\n- Formate o corpo de email agradavelmente com quebra de linha e estrutura clara.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4d6e8e6e-1e2f-4531-86ac-c7fddf40d0a5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        0,
+        224
+      ],
+      "id": "d7d5d211-18c7-4ac4-9690-c396955a6935",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        224
+      ],
+      "id": "44c5dc38-ab03-4c9a-941c-70f5b5c681b4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        240
+      ],
+      "id": "19712ea4-50e5-4538-9319-0d28433ccefb",
+      "name": "enviar_mensagem",
+      "webhookId": "2e86985b-98bc-4cd4-b4d1-9e5b1cef9fe1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "11hU8u_tFt8Sf0EGmU2hRpy0vzUnRGy7K28pXdNS5pqI",
+          "mode": "list",
+          "cachedResultName": "Contatos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11hU8u_tFt8Sf0EGmU2hRpy0vzUnRGy7K28pXdNS5pqI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "con_f_1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11hU8u_tFt8Sf0EGmU2hRpy0vzUnRGy7K28pXdNS5pqI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        192
+      ],
+      "id": "6d60f768-7f1d-4602-a45a-e48b5808ada0",
+      "name": "contatos",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enviar_mensagem": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "contatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "931dee11-ef42-4179-9f83-605a29c76044",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "S5ZIOoBDowQl27lh",
+  "tags": []
+}
