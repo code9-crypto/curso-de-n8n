@@ -1,0 +1,600 @@
+{
+  "name": "Automatização de classificador de mensagens",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour",
+              "minute": 59
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "72e11124-61fe-48fb-96da-76c9e0c7ea8d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        208,
+        160
+      ],
+      "id": "8aa3cd1c-1ce8-4f18-9337-28bbf218d1a6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Remente",
+              "description": "Extraia o nome do remente deste email. Caso não haja nome então retorne vazio"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Você é uma ferramenta de extração avançada. Traga somente detalhes relevantes do texto. Se não tiver certeza sobre qualquer valor do atributo requisitado então deixe-o vazio."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1ff16d50-6af0-4361-b550-8a824ff236e6",
+      "name": "Extrator de informações"
+    },
+    {
+      "parameters": {
+        "content": "## Extrai o nome do remetente\nEste nó é responsável por extrair o nome do remetente dentro do texto como prompt. Ele também usa um LLM para deixar a ferramenta mais inteligente",
+        "height": 464,
+        "width": 304,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "543254dc-fca5-409e-97b6-3950f9dd4579",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Gmail mensagens recebidas\nDentro de um intervalo de minutos, o gmail irá coletar os emails recebidos\n\n",
+        "height": 304,
+        "width": 272,
+        "color": "#6A3B06"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "f5399d4a-7fc4-40f6-a6b8-ca641ae93715",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cd2159b-c7c9-4b01-8a32-c6926b574441",
+              "name": "intro",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "c8b88593-5702-476d-88e9-7ffdfe04e62a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6d2bfee9-39ba-4f9e-937c-77072477886b",
+              "name": "intro",
+              "value": "Oi",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        768,
+        96
+      ],
+      "id": "0433da73-0538-4db9-a576-1e0f9f1e0b92",
+      "name": "Edit Fields1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1ca910af-c5d4-4d62-9754-eb133c7752bc",
+              "leftValue": "={{ $json.output.Remente }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        512,
+        0
+      ],
+      "id": "c1614e9f-3c2f-41dd-a88e-0039dcd691c1",
+      "name": "Condicional"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ff72d3a-76ff-4709-bb1b-c608175c178b",
+              "name": "message_id",
+              "value": "={{ $('Gmail Trigger').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "6f0c8fe2-848c-4746-b5dc-b14dbcf25b36",
+              "name": "intro",
+              "value": "={{ $json.intro }}",
+              "type": "string"
+            },
+            {
+              "id": "655510c5-7896-4288-bc59-ae7c7c978f4b",
+              "name": "threadId",
+              "value": "={{ $('Gmail Trigger').item.json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "a1e7ba95-92e2-4d2e-8094-b43ef4ba2042",
+              "name": "text",
+              "value": "={{ $('Gmail Trigger').item.json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1216,
+        16
+      ],
+      "id": "64895cac-f1a1-4b73-b0a2-b04db94aab03",
+      "name": "Dados limpos"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "={{ $json.intro }}",
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1008,
+        16
+      ],
+      "id": "c2b77e87-3157-401b-a027-d3ddd628a600",
+      "name": "Unificador de dados"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Avisos de cursos",
+              "description": "Informações sobre novos cursos, parabenizações e coisas relacionadas"
+            },
+            {
+              "category": "Pagamentos e Cobranças",
+              "description": "Informações de pagamentos, avisos de cobranças e outros pagamentos e cobranças em geral"
+            },
+            {
+              "category": "Empregos",
+              "description": "Mensagens de vagas de emprego"
+            },
+            {
+              "category": "Outros",
+              "description": "Informações que não se encaixam nas outras categorias"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Please classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        0
+      ],
+      "id": "c62ff588-3285-4b60-aea8-bf46cc26c627",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        224
+      ],
+      "id": "780bc435-054b-4a3e-9172-9652d25eba84",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Dados limpos').item.json.message_id }}",
+        "labelIds": [
+          "Label_6882265189742920336"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1936,
+        -384
+      ],
+      "id": "1d7163e4-74ac-48f6-897a-128ec4b20211",
+      "name": "Mensagens de avisos de cursos",
+      "webhookId": "b5b663af-6cbc-44ac-9992-3ac9968c28d3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Dados limpos').item.json.message_id }}",
+        "labelIds": [
+          "Label_955554469307757910"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        -144
+      ],
+      "id": "25482ca3-bd10-4f24-8a90-4b0006449cea",
+      "name": "Mensagens de pagamentos e cobranças",
+      "webhookId": "6b63804e-f79e-4a81-af7d-087f67e6581d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Dados limpos').item.json.message_id }}",
+        "labelIds": [
+          "Label_127717956412072121"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        80
+      ],
+      "id": "0a078e70-6716-4878-836a-2ad20d214551",
+      "name": "Mensagens de vagas de emprego",
+      "webhookId": "aea90866-916e-48e2-ac9b-7a4df0921bc3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Dados limpos').item.json.message_id }}",
+        "labelIds": [
+          "Label_2943509177371277025"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        304
+      ],
+      "id": "22414f2e-188c-48dd-a460-f3c1befbeec1",
+      "name": "Outras mensagens",
+      "webhookId": "2a333cd2-b4d3-4a50-94d3-ddd9926f0fef",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Mudança de dados\nEsses nós irão mudar apenas o campo nome do remetente\n",
+        "height": 592,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        704,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "f9ef3428-6e2b-4263-8979-b5d43539a3a8",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Classificando mensagem\n\nEste nó está lê a mensagem, classifica e depois enviar o setor( rótulo ) correspondente.",
+        "height": 560,
+        "width": 432,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1344,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "c65fcaa4-12e8-4866-ac1d-5362960eb7cd",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Rótulos de mensagens\nEsses são os rótulos de mensagens os quais as mensagens enviadas( pelo classificador no nó anterior) envia",
+        "height": 928,
+        "width": 544,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1792,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "b3bbf28a-cae8-4344-aa03-d8a80dcd6aa3",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extrator de informações",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extrator de informações",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrator de informações": {
+      "main": [
+        [
+          {
+            "node": "Condicional",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condicional": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Unificador de dados",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Unificador de dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificador de dados": {
+      "main": [
+        [
+          {
+            "node": "Dados limpos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dados limpos": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Mensagens de avisos de cursos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagens de pagamentos e cobranças",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagens de vagas de emprego",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Outras mensagens",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "120a05da-3ed9-4e21-93eb-fd6ff2ba1e4c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "BUwMkwScUN1lvK44",
+  "tags": []
+}
