@@ -1,0 +1,16 @@
+Crie um aplicativo gerador de respostas para perguntas de concursos públicos com inteligência artificial. A interface deve ser limpa, moderna e visualmente atraente. Os usuários devem poder digitar uma descrição da pergunta ou a pergunta completa desejada e clicar em um botão para gerá-la.
+
+Para gerar a imagem, envie uma solicitação POST para este endpoint:
+http://localhost:5678/webhook/perguntas
+
+O corpo da requisição deve ter a seguinte aparência:
+
+{
+
+"prompt": "Na cidade de Gabriela tem uma estrada com 6 km e
+ela corre 2/3 dessa distância todos os dias. Qual das
+alternativas abaixo cita corretamente a distância que
+Gabriela corre diariamente?"
+}
+
+A API retornará a resposta gerada em formato de texto bem claro.

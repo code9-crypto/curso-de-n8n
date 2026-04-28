@@ -1,0 +1,474 @@
+{
+  "name": "gerador de conteudos redes sociais",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f8c8455f-8864-4915-aed0-3e2872d38fb6",
+              "name": "consulta",
+              "value": "={{ $json.ASSUNTO }}",
+              "type": "string"
+            },
+            {
+              "id": "1079f64d-139c-42c6-83fb-4a9cb4823262",
+              "name": "publico_alvo",
+              "value": "={{ $json['PÚBLICO ALVO'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "da36779e-b44c-4ded-bb05-8251a1db2701",
+      "name": "resume_dados"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "228aa687-aa41-43c6-9b6d-235ccbcec989",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "specifiedFields",
+        "fieldsToInclude": "title, raw_content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "c4f14a78-f12a-46d9-9281-52ecf7ff90bf",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4",
+          "mode": "list",
+          "cachedResultName": "campanhas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9689b785-fd94-4ccb-a792-9525b7a8225c",
+      "name": "pega dados da planilha do google",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "9KrD1ltNA6q8D8zb",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"api_key\": \"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\", \"query\": \"{{ $json.consulta.replace(/\"/g, '\\\\\"') }}\", \"search_depth\": \"basic\", \"include_answer\": true, \"topic\": \"news\", \"include_raw_content\": true, \"max_results\": 3, \"country\":\"brazil\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "29d4ed04-743b-4619-a332-d34a8fa08afd",
+      "name": "noticias"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        -16
+      ],
+      "id": "253789f5-5caf-46c2-b69c-55ef36d4acc6",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Article Content:\n{{ $('Aggregate').item.json.data.toJsonString() }}\nTarget Audience:\n{{ $('resume_dados').first().json.publico_alvo }}",
+        "options": {
+          "systemMessage": "**Função no Sistema**\nVocê é um especialista em criação de conteúdo para o Facebook, capaz de transformar artigos em posts concisos e\nde alto impacto, elaborados para um público específico.\n\n**Especificação da Tarefa**\nUsando o artigo fornecido, crie um post para o Facebook que seja:\nCurto, atraente e fácil de ler em dispositivos móveis\nProjetado para corresponder aos interesses, necessidades e objetivos do público-alvo\nInclua 1 a 2 emojis para adicionar personalidade\nForneça valor ou insights e inclua uma chamada clara para ação\nContenha de 1 a 3 hashtags relevantes\nApresente apenas o conteúdo do post — nada mais\n\n**Especificações e Contexto**\nO post deve capturar a ideia central do artigo em uma mensagem envolvente\nDeve chamar a atenção rapidamente, entregar valor imediatamente e gerar interação (curtidas, comentários ou compartilhamentos)\n\n**Exemplo**\nEntrada: Artigo sobre dicas de produtividade para gerentes\nSaída:\n🔥 Muitas reuniões e tarefas?\nVeja como os gestores inteligentes se mantêm à frente:\nPriorize com a Matriz de Eisenhower\nReserve tempo para se concentrar\nDelegue mais, estresse menos\nQual é a sua maneira favorita de se manter produtivo? Compartilhe nos comentários ⬇️\n#Produtividade #Liderança #TrabalheComInteligência\n\n** Lembretes **\nMantenha o tom amigável e conversacional\nUse emojis para destacar pontos-chave, sem sobrecarregar a publicação\nCertifique-se de que o conteúdo seja relevante e valioso para o público\nForneça apenas o texto final da publicação, nada além disso\n\n**Idioma**\nRetorne a saída na linguagem portuguesa(Português do Brasil)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1856,
+        -80
+      ],
+      "id": "05ab9e01-99f9-4b72-ba5f-39f51f191716",
+      "name": "agente do Facebook"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4",
+          "mode": "list",
+          "cachedResultName": "campanhas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1VBmdKtXugV7BVTgazx5iX-MXzwtCmaP56oFgipVe6r4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "LINKEDIN": "={{ $json.output }}",
+            "BLOG": "={{ $json.output }}",
+            "FACEBOOK": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "CAMPANHA",
+              "displayName": "CAMPANHA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "ASSUNTO",
+              "displayName": "ASSUNTO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "PÚBLICO ALVO",
+              "displayName": "PÚBLICO ALVO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "LINKEDIN",
+              "displayName": "LINKEDIN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FACEBOOK",
+              "displayName": "FACEBOOK",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "BLOG",
+              "displayName": "BLOG",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2224,
+        -80
+      ],
+      "id": "7c16e9da-1719-4c84-a013-103a7c283c69",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Article Content:{{ $('Aggregate').item.json.data.toJsonString() }}Target Audience:{{ $('resume_dados').first().json.publico_alvo }}",
+        "options": {
+          "systemMessage": "**Função no Sistema** \nVocê é um especialista em conteúdo do LinkedIn que transforma artigos em posts de alto desempenho direcionados a públicos profissionais específicos. \n\n**Detalhes da Tarefa**\nUse o artigo fornecido para criar um post no LinkedIn que seja: Claro, envolvente e otimizado para leitura em dispositivos móveis Adaptado aos objetivos e interesses profissionais do público-alvo Escrito apenas em texto simples (sem formatação), com quebras de linha para facilitar a leitura Inclua de 1 a 2 emojis para adicionar personalidade Ofereça valor real e prático e inclua uma chamada para ação Termine com de 3 a 5 hashtags relevantes O resultado deve conter apenas o texto final do post — nada mais. \n\n**Requisitos do Post**\nMantenha o tom humano e conversacional Limite-se a 3.000 caracteres O post deve capturar a essência do artigo, alinhando-se ao que é mais importante para o público\n\n**Exemplo**\nEntrada: Artigo sobre dicas de produtividade para gerentes\nSaída:\n🔥 Pronto para aumentar sua produtividade?\nGerentes — se vocês estão afogados em reuniões e sentindo a pressão, aqui vai um lembrete de que trabalhar de forma mais inteligente é possível.\n👉 Experimentem estas mudanças simples:\nUse a Matriz de Eisenhower para priorizar tarefas\nReserve sessões de trabalho profundo na sua agenda\nDelegue mais para liberar espaço mental\nO que tem ajudado vocês a se manterem organizados ultimamente?\nCompartilhem sua dica favorita para economizar tempo nos comentários 👇\n#Liderança #TrabalheDeFormaInteligente #GestãoDeTempo #Produtividade #CrescimentoNaCarreira\n\n** Lembretes Importantes **\nAdeque o conteúdo às dificuldades, à linguagem e à motivação do público\nSempre inclua 1 a 2 emojis, uma chamada para ação (CTA) forte e informações úteis\nUse texto simples, limpo e dividido (sem formatação ou informações extras)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1472,
+        -192
+      ],
+      "id": "10e09d99-233d-4de7-b84d-624b9b9d9590",
+      "name": "agente do Linkedin"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Article Content:\n{{ $('Aggregate').item.json.data.toJsonString() }}\nTarget Audience:\n{{ $('resume_dados').first().json.publico_alvo }}",
+        "options": {
+          "systemMessage": "**Função no Sistema**\nVocê é um(a) redator(a) de blog habilidoso(a) e criativo(a), capaz de criar artigos de blog envolventes, concisos e bem estruturados, com dois parágrafos, com base no conteúdo fornecido.\n\n**Especificação da Tarefa**\nEscreva um artigo de blog com dois parágrafos usando o conteúdo fornecido.\nCertifique-se de que o blog seja coerente, envolvente e informativo para um público geral.\nUse um tom profissional, porém amigável.\nMantenha uma estrutura lógica que flua da introdução à conclusão.\n\n**Especificidades e Contexto**\nEsta tarefa foi criada para gerar conteúdo de blog curto e de alta qualidade.\nO objetivo é capturar a atenção, transmitindo claramente a mensagem pretendida.\n\nSua escrita ajuda marcas ou indivíduos a construir liderança de pensamento e se conectar com seu público.\n**Exemplos**\nEntrada:\nConteúdo: \"O trabalho remoto cresceu 44% nos últimos cinco anos. Os benefícios incluem flexibilidade e redução do tempo de deslocamento.\nOs desafios incluem manter a produtividade e combater o isolamento.\"\nSaída:\nO trabalho remoto tornou-se uma tendência transformadora, com um aumento de 44% na adoção nos últimos cinco anos.\n\nO apelo reside na sua flexibilidade, permitindo que os funcionários adaptem seus horários e eliminem deslocamentos demorados.\n\nEssa mudança abriu novas possibilidades para o equilíbrio entre vida profissional e pessoal e ampliou o leque de talentos para empresas dispostas a adotar modelos de trabalho remoto.\n\nNo entanto, o trabalho remoto não está isento de desafios.\n\nOs funcionários frequentemente enfrentam dificuldades para manter a produtividade fora de um ambiente de escritório estruturado e lutam contra sentimentos de isolamento.\n\nAbordar essas preocupações requer soluções ponderadas,\ncomo ferramentas de colaboração virtual e estratégias para promover a conexão, garantindo que o trabalho remoto permaneça produtivo e gratificante.\n\nEntrada:\nConteúdo: \"A dieta mediterrânea inclui frutas, vegetais, grãos integrais e gorduras saudáveis, como o azeite de oliva.\nEstudos mostram que ela reduz o risco de doenças cardíacas e contribui para a saúde cerebral.\"\n\nSaída:\nA dieta mediterrânea é reconhecida há muito tempo como um dos padrões alimentares mais saudáveis ​​do mundo.\nCom ênfase em frutas frescas, vegetais, grãos integrais e gorduras saudáveis ​​para o coração, como o azeite de oliva, esta dieta é tão deliciosa quanto nutritiva.\nSua diversidade de sabores facilita a adoção e a manutenção, seja você saboreando uma vibrante salada grega ou uma tigela reconfortante de minestrone.\nO que diferencia a dieta mediterrânea são seus benefícios para a saúde comprovados cientificamente.\nInúmeros estudos destacam sua capacidade de reduzir o risco de doenças cardíacas e apoiar a saúde cognitiva,\ntornando-a um pilar para a longevidade e o bem-estar.\nAo priorizar alimentos naturais e não processados, esse estilo de vida oferece uma abordagem sustentável para comer bem e viver melhor.\n\n** Lembretes **\nMantenha a clareza e a fluidez lógica entre os parágrafos\nMantenha o tom profissional e envolvente\nSeja conciso e alinhado com o conteúdo fornecido\nSocial\n\n** Idioma **\nRetorne a saída na liguangem portugues (Português do Brasil)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1088,
+        0
+      ],
+      "id": "ea136251-6edc-475e-a324-dcb17a101ac5",
+      "name": "Agente de Blog"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemma-4-26b-a4b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        960,
+        208
+      ],
+      "id": "73d69f0e-49b8-4a4f-9ad6-a3c7e68f81fe",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        128
+      ],
+      "id": "68c09aa6-f332-4290-ade1-b9272215181a",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "resume_dados": {
+      "main": [
+        [
+          {
+            "node": "noticias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pega dados da planilha do google": {
+      "main": [
+        [
+          {
+            "node": "resume_dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "noticias": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Agente de Blog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agente do Linkedin",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente do Linkedin": {
+      "main": [
+        [
+          {
+            "node": "agente do Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Blog": {
+      "main": [
+        [
+          {
+            "node": "agente do Linkedin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agente do Facebook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Blog",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "agente do Facebook",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "47bfd84d-ce7b-4955-ae2b-cc4fe88ab705",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "YckJDKzSuCLPbwcP",
+  "tags": []
+}

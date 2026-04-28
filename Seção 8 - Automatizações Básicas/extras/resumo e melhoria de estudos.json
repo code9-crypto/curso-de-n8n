@@ -1,0 +1,249 @@
+{
+  "name": "resumo e melhoria de estudos",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "id": "7038248a-8271-42ac-bd78-5c68e9974073",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "** Principal **\nVocê é um assistente o qual pega utiliza o texto fornecido no nó anterior para criar um resumo no formato PDF.\n\nEste resumo conter:\n- Máteria\n- Assunto em si de forma resumida, clara e objetiva\n\n** Conteúdo para estudar **\nDepois de ter feito isso, crie um conteúdo resumido simples e objetivo de cada matéria com base na ferramenta brasil_escola\n\n** Cada tema **\nDentro de cada matéria há um tema. Preciso que pegue este tema crie um resumo com base na ferramenta brasil_escola e também se a ferramenta pensador para dizer como resolver a questão.\nProcure ser bem explicativo onde qualquer pessoa de qualquer nível de escolaridade possa entender.\nForneça mais detalhes relavantes para melhor entendimento do estudante\n\n##Ferramentas\n1. Use a ferramenta brasil_escola para fazer uma pesquisa mais apurada em relação ao conteúdo no PDF fornecido anteriormente.\n2. Use a ferramenta pensador para refinar mais o resumo de forma inteligente.\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        384,
+        0
+      ],
+      "id": "276485d4-1213-4ba2-8e4c-24a5e32e1526",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://drive.google.com/file/d/1J9RAu90r3ElNFvzN9bS-cz1rSwFzVndp/view?usp=drive_link",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -32,
+        0
+      ],
+      "id": "c67dd9af-9fe9-445e-a02c-9cd4d5b5f667",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "uAkpS30GC2jOHRX6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "7d6e9498-bfcb-4642-adc2-66f882a463e4",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        496,
+        224
+      ],
+      "id": "6d50bed4-68ff-4214-9b12-4411534a0b92",
+      "name": "pensador"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use esses links para ter acesso a informações mais precisas:\nMatemática\nhttps://brasilescola.uol.com.br/matematica/grandezas-diretamente-proporcionais.htm\nhttps://brasilescola.uol.com.br/quimica/unidades-medida.htm\nhttps://brasilescola.uol.com.br/matematica/o-controle-tempo-suas-unidades-medida.htm\nhttps://brasilescola.uol.com.br/matematica/diagrama-de-venn.htm\nhttps://brasilescola.uol.com.br/videos/regra-de-tres-simples.htm\nhttps://brasilescola.uol.com.br/matematica/porcentagem.htm\n\nPortuguês\nhttps://brasilescola.uol.com.br/redacao/a-interpretacao-textual.htm\nhttps://brasilescola.uol.com.br/gramatica/acentuacao-grafica.htm\nhttps://brasilescola.uol.com.br/gramatica/sinais-pontuacao.htm\nhttps://brasilescola.uol.com.br/gramatica/classificacao-das-palavras-que-e-se.htm\nhttps://brasilescola.uol.com.br/gramatica/verbo-haver-minucias-questao.htm",
+        "url": "https://brasilescola.uol.com.br/matematica",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        208
+      ],
+      "id": "c3d2ca84-fb77-4729-abda-99bc81b9f296",
+      "name": "brasil_escola"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        208
+      ],
+      "id": "64018a05-421f-43e6-8580-5ed10cceb803",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $json.output }}",
+        "name": "resumão3",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1RtFh6NDfyCxYjqtWh_KNBejI5iCCDbgP",
+          "mode": "list",
+          "cachedResultName": "estudos",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1RtFh6NDfyCxYjqtWh_KNBejI5iCCDbgP"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        736,
+        0
+      ],
+      "id": "32b45197-2dad-4d32-8e4a-b20a7c33a181",
+      "name": "Create file from text",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "uAkpS30GC2jOHRX6",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "pensador": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brasil_escola": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3e93d336-3179-4a43-899e-90724a634596",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "VZiVA8uqloiDfH9S",
+  "tags": []
+}

@@ -1,0 +1,162 @@
+{
+  "name": "resolução de questões de concursos",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=** Visão geral **\nVocê é um assistente prestativo que ajuda a resolver problemas de questão de concursos público.\n\n** Instruções **\nQuando você receber o conteúdo do {{ $json.chatInput }} use o nó \"inteligente\" para responder de forma mais humanizada.\nResponda as perguntas explicando o passo a passo de como pode ser resolvida de forma simples e objetiva.\nQuando houver questões que envolva frações, mostre a explicação e resultados de forma mais amigável possível\n\n** Evitar **\nNão use representações de frações similar a este jeito: [ \\text{Terceiro} = \\frac{1}{2}\\times \\text{Segundo} = \\frac{1}{2}\\times 500 = 250. ]",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        304,
+        112
+      ],
+      "id": "d1f62ec5-caae-4a52-9ac6-99f8e5d9ce49",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        112,
+        112
+      ],
+      "id": "972e585b-9345-40dd-bd02-20c339856fa6",
+      "name": "When chat message received",
+      "webhookId": "68072477-1fa4-4518-9ae8-7128661fd04f"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent",
+        "height": 280,
+        "width": 700
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "627eeda9-ece5-410c-a481-832200a3e7d9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Model",
+        "height": 300,
+        "width": 340,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        304
+      ],
+      "id": "bc79db4c-aa01-4cd3-acc4-e1536348d76d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Think Node",
+        "height": 300,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        304
+      ],
+      "id": "9f9f2f1a-38e9-413d-b697-e9068a167a85",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-safeguard-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        96,
+        416
+      ],
+      "id": "15ef743f-3581-4f07-8e8b-944dd39a95c3",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "### Visão Geral\nEsta ferramenta deve refletir sobre a mensagem do usuário e respondê-la de forma mais natural, clara e humana. Deve dar a impressão de que um assistente inteligente pensa um pouco antes de dizer algo. A resposta final deve soar como algo que uma pessoa real diria — fluida, informal e fácil de entender. Evite linguagem robótica ou excessivamente técnica. Mantenha a linguagem simples e conversacional.\n\n### Personalidade e Tom \n- Calmo, claro e ponderado\n\n- Fala como um ser humano real, não como um chatbot\n\n- Informal, mas respeitoso — como um colega inteligente\n\n- Evita explicações excessivas ou o uso de palavras complicadas\n\n- A resposta deve parecer refinada, mas natural\n\n### Exemplos de Linguagem Humana\nIncentive o uso de frases como:\n- \"Vamos dizer assim.\"\n\n- \"Isso pode soar melhor.\"\n\n- \"Aqui está uma maneira mais clara de dizer.\"\n\n- \"Isso soa um pouco robótico — vamos humanizar.\"\n\n- \"Vamos manter simples e natural.\"\n\n- \"Poderíamos resolver isso assim:\"\n- \"Parece quase certo, só precisa de um pequeno ajuste.\"\n\n### Vocabulário Sugerido\nPrefira alternativas mais humanas e informais:\n- \"um pouco\" em vez de \"ligeiramente\"\n\n- \"parece\" em vez de \"aparentemente\"\n\n- \"consertar\" em vez de \"resolver\"\n\n- \"obter\" em vez de \"conseguir\"\n\n- \"ajudar\" em vez de \"auxiliar\"\n\n- \"verificar\" em vez de \"confirmar\"\n\n- \"quase certo\" em vez de \"muito confiante\"\n\n- \"por precaução\" em vez de \"como precaução\"\n\n## Evite palavras como:\n\"começar\"\n\n\"utilizar\"\n\n\"assim\"\n\n\"portanto\"\n\n\"de acordo com\"\n\n\"no caso de\""
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        480,
+        432
+      ],
+      "id": "c8259b68-ca24-41f9-a5ee-73ff3118425a",
+      "name": "inteligente"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inteligente": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0e17f84f-e4c9-4cb5-b588-e0260e065136",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "5NovIdBpa0lP4SLo",
+  "tags": []
+}
