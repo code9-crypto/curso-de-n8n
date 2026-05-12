@@ -6,8 +6,7 @@
         "pollTimes": {
           "item": [
             {
-              "mode": "everyHour",
-              "minute": 59
+              "mode": "everyMinute"
             }
           ]
         },
@@ -32,7 +31,7 @@
     },
     {
       "parameters": {
-        "model": "llama-3.3-70b-versatile",
+        "model": "openai/gpt-oss-20b",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
@@ -255,7 +254,7 @@
             },
             {
               "category": "Pagamentos e Cobranças",
-              "description": "Informações de pagamentos, avisos de cobranças e outros pagamentos e cobranças em geral"
+              "description": "Informações de pagamentos, avisos de cobranças e outros pagamentos, cobranças e faturas em geral e referente a cartões"
             },
             {
               "category": "Empregos",
@@ -282,7 +281,7 @@
     },
     {
       "parameters": {
-        "model": "openai/gpt-oss-20b",
+        "model": "qwen/qwen3-32b",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
@@ -311,7 +310,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1936,
+        2000,
         -384
       ],
       "id": "1d7163e4-74ac-48f6-897a-128ec4b20211",
@@ -335,8 +334,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1952,
-        -144
+        2000,
+        -176
       ],
       "id": "25482ca3-bd10-4f24-8a90-4b0006449cea",
       "name": "Mensagens de pagamentos e cobranças",
@@ -359,8 +358,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1952,
-        80
+        2000,
+        64
       ],
       "id": "0a078e70-6716-4878-836a-2ad20d214551",
       "name": "Mensagens de vagas de emprego",
@@ -383,7 +382,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        1952,
+        2000,
         304
       ],
       "id": "22414f2e-188c-48dd-a460-f3c1befbeec1",
@@ -430,18 +429,57 @@
     {
       "parameters": {
         "content": "## Rótulos de mensagens\nEsses são os rótulos de mensagens os quais as mensagens enviadas( pelo classificador no nó anterior) envia",
-        "height": 928,
+        "height": 944,
         "width": 544,
         "color": 2
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
         1792,
-        -464
+        -480
       ],
       "typeVersion": 1,
       "id": "b3bbf28a-cae8-4344-aa03-d8a80dcd6aa3",
       "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "removeLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "INBOX"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2576,
+        0
+      ],
+      "id": "9225e4be-2a48-46d5-95ea-c1ae5455b1b5",
+      "name": "Remove label from message",
+      "webhookId": "8bc65d1e-be3b-4954-9239-442ac35d310c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Retira da caixa de entrada\nEste nó está sendo usado para retirar o rótulo da caixa da entrada a fim de ficar apenas no grupo específico\n",
+        "height": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2512,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "efe961a9-ecd5-4e38-907d-3ab508f8dbff",
+      "name": "Sticky Note5"
     }
   ],
   "pinData": {},
@@ -583,6 +621,50 @@
           }
         ]
       ]
+    },
+    "Mensagens de avisos de cursos": {
+      "main": [
+        [
+          {
+            "node": "Remove label from message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagens de pagamentos e cobranças": {
+      "main": [
+        [
+          {
+            "node": "Remove label from message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensagens de vagas de emprego": {
+      "main": [
+        [
+          {
+            "node": "Remove label from message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Outras mensagens": {
+      "main": [
+        [
+          {
+            "node": "Remove label from message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -590,7 +672,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "120a05da-3ed9-4e21-93eb-fd6ff2ba1e4c",
+  "versionId": "18538d5f-b3f6-4c9e-94f8-903305e24a23",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"

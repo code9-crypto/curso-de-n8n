@@ -1,0 +1,495 @@
+{
+  "name": "Organiza emails por rótulo",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5eb5e523-8ed8-4511-a254-f8e7966e6545",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "ef1e7af8-7cc9-4ed9-8c9f-47134fe7ff28",
+              "leftValue": "={{ $json.labelIds[0] }}",
+              "rightValue": "Label",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        272,
+        0
+      ],
+      "id": "87668505-1cb9-499e-9bd3-84d660b53ca4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tópico: {{ $json.subject }}\nDescrição: {{ $json.text }}\nRemetente: {{ $json.from.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "**Seu Papel**\nVocê é um assistente de e-mail inteligente responsável por classificar as mensagens recebidas.\n\nSua tarefa é analisar o conteúdo, o assunto e o remetente de cada e-mail e atribuí-lo à categoria apropriada.\n\n**Categorias**\nCategorias para classificação:\n- concursos públicos: mensagens referentes a venda de apostilas, anúncios desses e qualquer coisa relacionada a concurso público;\n- cursos: mensagens referentes a propagandas e anúncios de venda de cursos, sorteios desses ou até mesmo cursos gratuitos ou plataformas\n- google: mensagens enviadas pelo próprio google\n- variedades: mensagens que dizem sobre promoções de produtos ou de comida\n\n**Instruções**\nPara cada e-mail:\n\n Analise o conteúdo, o assunto e o remetente\n Atribua-o à categoria apropriada\n Adicione um rótulo com a categoria\n Se não tiver certeza, não rotule a mensagem\n\n**Formato da Resposta**\nSempre retorne o resultado em formato JSON:\n{\n \"email_label\": \"business\"\n}\n\nIMPORTANTE  a resposta deve sempre estar em letras minúsculas."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        528,
+        0
+      ],
+      "id": "75db01da-4e74-4e30-8f6b-1f04dfbde4ca",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"email_label\": \"business\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        192
+      ],
+      "id": "0a150ac6-d2ff-443c-8d74-0cddabbfdc83",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        496,
+        192
+      ],
+      "id": "4be0a434-429f-4d5f-9b4a-d95ca6d4d213",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.email_label }}",
+                    "rightValue": "concursos públicos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "103015b0-fae1-4e52-844e-93ec119bb62d"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Concursos Públicos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "bd2c5e33-515d-4480-b265-fc7749c03e6d",
+                    "leftValue": "={{ $json.output.email_label }}",
+                    "rightValue": "cursos",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Cursos"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c347c9ca-2c14-40d6-80e2-96a3278cd4f0",
+                    "leftValue": "={{ $json.output.email_label }}",
+                    "rightValue": "google",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Google"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "6835ef08-428d-473e-88af-d2a762b1d826",
+                    "leftValue": "={{ $json.output.email_label }}",
+                    "rightValue": "variedades",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Variedades"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        992,
+        -32
+      ],
+      "id": "db4ceef7-0752-4c55-847b-fa1d4fb7cf26",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_2677326354366257929"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        -384
+      ],
+      "id": "e7b37d81-23ae-4d7a-9bdd-9abf9c0bda72",
+      "name": "Concurso Público",
+      "webhookId": "10a81ad0-ad65-43ae-9cb5-69f460348a99",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_366993824156998023"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        -144
+      ],
+      "id": "a8e519fd-8319-4445-9fd2-d4d9b0966089",
+      "name": "Cursos",
+      "webhookId": "10a81ad0-ad65-43ae-9cb5-69f460348a99",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_7914492820952912649"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        96
+      ],
+      "id": "94c4d4d7-96d4-4c56-96c0-c35f16bc987f",
+      "name": "Google",
+      "webhookId": "10a81ad0-ad65-43ae-9cb5-69f460348a99",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_7543016338702692434"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        352
+      ],
+      "id": "12865e43-ac9b-4fe8-b1ab-88b280741730",
+      "name": "Variedades",
+      "webhookId": "10a81ad0-ad65-43ae-9cb5-69f460348a99",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "removeLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "INBOX"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1968,
+        -64
+      ],
+      "id": "44a5e091-1d2b-4098-8f2e-857f6beab837",
+      "name": "Remove da caixa de entrada",
+      "webhookId": "6a11e1bd-af09-41bd-9cb1-c9adea34270d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Concurso Público",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cursos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Variedades",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concurso Público": {
+      "main": [
+        [
+          {
+            "node": "Remove da caixa de entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cursos": {
+      "main": [
+        [
+          {
+            "node": "Remove da caixa de entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google": {
+      "main": [
+        [
+          {
+            "node": "Remove da caixa de entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variedades": {
+      "main": [
+        [
+          {
+            "node": "Remove da caixa de entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "92c89527-8a10-4e97-99dc-925cfeed3036",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "MLaxHd2R6AVL9Ynp",
+  "tags": []
+}

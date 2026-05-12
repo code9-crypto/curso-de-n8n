@@ -1,0 +1,414 @@
+{
+  "name": "Gerencia receitas e despesas",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "8fe96ca1-7fc1-4572-a10f-064da3bd04a8",
+      "name": "When chat message received",
+      "webhookId": "e95101f6-6127-49ff-9176-97640f8aa929"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é um assistente prestativo. Você está acostumado em guardar as despesas e receitas.\nRegistre o que foi recebido na chat usando o nó \"gerenciar\"",
+          "maxIterations": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        16,
+        -16
+      ],
+      "id": "d3c82ed2-174e-4013-8070-8896e9aca39e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        176
+      ],
+      "id": "9c6e6370-de0c-4384-b037-a57e09c0094b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        176
+      ],
+      "id": "b0bd33e1-fe57-4876-9fd5-81040dcce2e3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06f30a24-aa73-4387-a46a-58385d50e409",
+              "name": "resposta",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "caba90c7-d972-4180-a122-1c4662ed8fc6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "data"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -288,
+        368
+      ],
+      "id": "be2e142a-e28a-48bc-b2fc-688d68302439",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "text": "=Converta o valor recebido em JSON {{ $json.data }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "valor",
+              "type": "number",
+              "description": "Custo da despesa ou receita",
+              "required": true
+            },
+            {
+              "name": "Descrição",
+              "description": "descrição da receita ou despesa",
+              "required": true
+            },
+            {
+              "name": "data",
+              "type": "date",
+              "description": "data da receita ou despesa",
+              "required": true
+            },
+            {
+              "name": "tipo",
+              "description": "tipo da receita ou despesa",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        368
+      ],
+      "id": "38ce7101-a91f-4a3e-9463-950dcf75892d",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        576
+      ],
+      "id": "f00e8c66-717a-4902-8144-b9079379464b",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pElSZJvpeGM4z8MpZWrtWyVa2zocSEAbrP6YU3AJUlo",
+          "mode": "list",
+          "cachedResultName": "Minhas despesas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pElSZJvpeGM4z8MpZWrtWyVa2zocSEAbrP6YU3AJUlo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pElSZJvpeGM4z8MpZWrtWyVa2zocSEAbrP6YU3AJUlo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Descrição": "={{ $json.output['Descrição'] }}",
+            "Valor": "={{ $json.output.valor }}",
+            "Data": "={{ $json.output.data }}",
+            "Tipo": "={{ $json.output.tipo }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Descrição",
+              "displayName": "Descrição",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Tipo",
+              "displayName": "Tipo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        368
+      ],
+      "id": "fa6474c3-cd83-4d8c-8739-60941cdf939a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PaL0ooY0ImqORUv0",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/PaL0ooY0ImqORUv0",
+          "cachedResultName": "Gerencia receitas e despesas"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "data": "={{ $json.chatInput }}"
+          },
+          "matchingColumns": [
+            "data"
+          ],
+          "schema": [
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        176
+      ],
+      "id": "0f57e949-2e74-4af5-a142-969ec8643c2b",
+      "name": "gerenciar"
+    },
+    {
+      "parameters": {
+        "content": "## DETALHE IMPORTANTE:\nPARA QUE ESTE FLUXO DE TRABALHO FUNCIONE É NECESSÁRIO QUE ESTE ESTEJA PUBLICADO\n",
+        "height": 80,
+        "width": 912
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "26181459-eaf5-4872-ac32-fcb6a79e8d9a",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gerenciar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c96ea41b-6ac9-407a-bbc8-e716fe085a11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "PaL0ooY0ImqORUv0",
+  "tags": []
+}
