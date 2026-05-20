@@ -1,0 +1,117 @@
+{
+  "name": "Reenvio de email(ester para william)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2391f6c1-d178-4a14-aeae-13a75e6a5ce3",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7UhQIpSOyZnu5nDe",
+          "name": "Conta de email da ester"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "william959512@gmail.com",
+        "subject": "Email da esposa",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "566156d6-b77f-43c0-b6ad-9e899a20400c",
+      "name": "Send a message",
+      "webhookId": "a0a873da-35eb-40ef-add9-269b93408ca5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "7UhQIpSOyZnu5nDe",
+          "name": "Conta de email da ester"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Coleta email da esposa\nPega os e-mails da caixa de entrada da minha esposa",
+        "height": 288,
+        "width": 304,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "91bb12a9-3adb-43b4-be0e-c3e9a4c0d6f1",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Envia para meu e-mai principal\nAssim que cair algum e-mail para minha esposa, vai ser enviado para eu também",
+        "height": 288,
+        "width": 320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "5a773fc9-5548-4261-8345-51a979b1f144",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6f0224c2-9ef6-40be-89c1-0a74737fb8c8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "AYlkDBMsCWkSAcaq",
+  "tags": []
+}
