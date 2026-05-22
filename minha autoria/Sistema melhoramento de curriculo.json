@@ -1,0 +1,421 @@
+{
+  "name": "Sistema melhoramento de curriculo",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulario melhoramento de Curriculo",
+        "formDescription": "Use este formulário para melhorar o currículo",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Arquivo",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4801315f-1981-4cd8-98e5-2320e68e1fe5",
+      "name": "On form submission",
+      "webhookId": "e55afba8-019a-4245-ab05-14bbc706e6e6"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1yr4wfFgJhvR0Oxc4E4Q8SCgxhKKX_hdT",
+            "mode": "list",
+            "cachedResultName": "curriculos",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1yr4wfFgJhvR0Oxc4E4Q8SCgxhKKX_hdT"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        592,
+        -320
+      ],
+      "id": "35493582-b467-490b-a113-d28f6092f172",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "uAkpS30GC2jOHRX6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        768,
+        -48
+      ],
+      "id": "7be68ebc-2102-444f-8924-63b432a283c8",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "uAkpS30GC2jOHRX6",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.corpo }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "1. Currículo: A Estrutura Ideal e Estratégias Avançadas",
+              "description": "Informações relevantes exclusivamente ao currículo",
+              "required": true
+            },
+            {
+              "name": "2. LinkedIn: Estratégias para um Perfil Campeão e Networking Eficaz",
+              "description": "Informações relevantes exclusivamente ao linkedin",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        -368
+      ],
+      "id": "ef0100f2-6a78-4348-a7ac-a9aae04dbb18",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        -192
+      ],
+      "id": "3eb1dd9b-ab4e-4b49-b62f-d78e1c4ac057",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7f0d3000-5e81-4fd1-8da5-b753a8d20861",
+              "name": "curriculo",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        384,
+        -64
+      ],
+      "id": "d4a5df71-ec6a-4f3e-b64d-dcd4d64629ae",
+      "name": "corpo do curriculo"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        -304
+      ],
+      "id": "d59b40aa-9aeb-4067-a76b-63738dca7851",
+      "name": "extrai o texto do checklist"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Arquivo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        -288
+      ],
+      "id": "6395fdf4-bbf0-42d9-800c-a8b9583e5de0",
+      "name": "extrai texto do curriculo"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f5f64bad-8294-4918-95a8-0d2ec028d56e",
+              "name": "corpo",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        -112
+      ],
+      "id": "cbebbb3e-6913-4535-8bf0-16803773c837",
+      "name": "corpo do checklist"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=corpo do currículo:  {{ $('corpo do curriculo').item.json.curriculo }}\nchecklist do curriculo: {{ $json.output['1. Currículo: A Estrutura Ideal e Estratégias Avançadas'] }}",
+        "options": {
+          "systemMessage": "** Função principal **\nVocê um especialista em criar, reformular e melhorar currículos;\nCom base nas informações recebidas, gere um novo currículo com as melhorias do checklist a fim de que a aceitação seja mais que 90%\n\n** Segmentos **\n- Escreva com texto limpo e claro;\n- Seja criativo;\n- Não esqueça de usar um português com pontuação, espaçamento e acentuação totalmente correta;\n- Crie títulos para cada tópico de habilidade;\n- Formate o texto de forma profissional;\n- Em cada título deixe em negrito, não ponha nenhum marcador extra e deixe em letras maiúsculas;\n- Ponha marcadores em cada item que contiver dentro dos tópicos, somente;\n- Não ponha nenhum texto extra antes das informações pessoais;\n- Nas informações pessoais deixe o link do linkedin mais visível e amigável\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1568,
+        -160
+      ],
+      "id": "a1fdd4c1-238e-40d1-a96b-e03975473d33",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        16
+      ],
+      "id": "4576a9c7-c4d9-4281-b410-91a6a153442f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "binaryPropertyName": "curriculo",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1856,
+        -368
+      ],
+      "id": "d8c66c3f-d74f-462d-bee3-f81cb842b926",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -128
+      ],
+      "id": "3db77cad-1df0-4d4a-8a9e-0ad0575200b2",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "extrai texto do curriculo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "extrai o texto do checklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "corpo do curriculo": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai o texto do checklist": {
+      "main": [
+        [
+          {
+            "node": "corpo do checklist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extrai texto do curriculo": {
+      "main": [
+        [
+          {
+            "node": "corpo do curriculo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "corpo do checklist": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ae050e03-505e-428c-925a-52829b1472b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "7gjq0E5jNxlNjjeL",
+  "tags": []
+}
