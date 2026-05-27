@@ -1,0 +1,308 @@
+{
+  "name": "Sistema que verifica mensagens do D.O de santos a respeito da Prodesan",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        0
+      ],
+      "id": "6b344818-fa39-4e78-9fb9-1a219f2d4e2a",
+      "name": "Retira o texto do PDF"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        864,
+        144
+      ],
+      "id": "4c929081-81a2-4285-add6-dfad00eb6337",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.texto_pdf }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Prodesan",
+              "description": "Retire todo o conteúdo pertinente à Prodesan ou prodesan ou PRODESAN",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Você é um especialista em extrair informações;\nSua função é retirar do texto as informações pertinentes à prodesan.\n\nO retorno da saída deverá ser desta forma:\n- TÍTULO\n- corpo do título, incluindo subtópicos."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        864,
+        0
+      ],
+      "id": "8e3461d8-ab43-4e20-b3c2-3f68c8bbbebc",
+      "name": "Extrai dados da Prodesan"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Faça um resumo bem sucinto dessas informações, mas não retire nada que seja de suma importância para entendimento completo da informação;\nOs dados são esses: {{ $json.output.Prodesan }}\nCaso haja dados referentes à convocação de candidatos, descreve também o cargo para qual eles foram chamados."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1216,
+        0
+      ],
+      "id": "221b0135-cfe7-464d-b651-50fcc48933de",
+      "name": "Resume informções",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "97d2583c-3c97-4fd5-9166-de875b368a36",
+      "name": "Gatilho às 9:30 todos os dias"
+    },
+    {
+      "parameters": {
+        "url": "=https://diariooficial.santos.sp.gov.br/edicoes/inicio/download/{{ $now.format('yyyy-MM-dd') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        128,
+        0
+      ],
+      "id": "b7c27cbd-9574-47c1-b832-0f1e469fc4eb",
+      "name": "Pega PDF do D.O de santos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "055060e4-aaaa-43d8-bfc7-65d734074777",
+              "name": "texto_pdf",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "fd548444-5399-44a3-bd9b-6425ddac8cca",
+      "name": "Pega apenas o corpo do texto"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9ef0de47-4929-437f-947a-017ba2a3811f",
+              "name": "Resumo da Prodesan",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "2b14bda8-7f02-4949-a1c6-1065bc0df492",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "chatId": "8761491718",
+        "text": "={{ $json['Resumo da Prodesan'] }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        0
+      ],
+      "id": "a0b7dcba-7d86-453a-bbf3-e655e21acfcd",
+      "name": "Mensagem da Prodesan",
+      "webhookId": "6903b55e-cca3-406b-9a17-95a16dd77828",
+      "credentials": {
+        "telegramApi": {
+          "id": "IZMgv6I1vZmPCS7V",
+          "name": "Mensagens Prodesan"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Retira o texto do PDF": {
+      "main": [
+        [
+          {
+            "node": "Pega apenas o corpo do texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extrai dados da Prodesan",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrai dados da Prodesan": {
+      "main": [
+        [
+          {
+            "node": "Resume informções",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gatilho às 9:30 todos os dias": {
+      "main": [
+        [
+          {
+            "node": "Pega PDF do D.O de santos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pega PDF do D.O de santos": {
+      "main": [
+        [
+          {
+            "node": "Retira o texto do PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pega apenas o corpo do texto": {
+      "main": [
+        [
+          {
+            "node": "Extrai dados da Prodesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume informções": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Mensagem da Prodesan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "aec9eb76-0eea-4e53-87d0-3c868a79d524",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "rup5TdI1l2JZu60T",
+  "tags": []
+}
