@@ -1,0 +1,377 @@
+{
+  "name": "Agente que mostra notícias mais recentes",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -416,
+        0
+      ],
+      "id": "77cf440b-3059-4951-89bc-30030fcdbed6",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "apiKey",
+              "value": "e09efbb00ba646d6bbde61e88af43edc"
+            },
+            {
+              "name": "q",
+              "value": "educação"
+            },
+            {
+              "name": "language",
+              "value": "pt"
+            },
+            {
+              "name": "sortBy",
+              "value": "publishedAt"
+            },
+            {
+              "name": "pageSize",
+              "value": "10"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "7c917fa8-cc5b-489d-9a20-6ca56ebcfcf0",
+      "name": "Noticías 1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apitube.io/v1/news/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "10"
+            },
+            {
+              "name": "language.code",
+              "value": "pt"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "api_live_2lWz4nNcPY6nlcK3mly8ra3W6ndDlTonEq9u1VDXtwlf04r2SADvEafR4di6"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        112,
+        176
+      ],
+      "id": "d6f089ee-172c-43f8-bf68-e0e738fd8676",
+      "name": "Notícias 2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "95b7c094-806a-471d-b40d-60cf579907ad",
+              "name": "articles",
+              "value": "={{ $json.articles }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -176
+      ],
+      "id": "68b15d1d-b7f0-4786-99ca-18a885b5ccef",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "93c1c5bf-8e41-4999-a729-35719a5a256b",
+              "name": "results",
+              "value": "={{ $json.results }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        176
+      ],
+      "id": "1f58ea96-8935-4f7d-88ec-58e8e72bf6f3",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        656,
+        0
+      ],
+      "id": "06ff31b7-69fa-4374-9cd9-f98c072c7ab6",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=** Selecione os melhores artigos **\nSua principal função é selecionar as 10 melhores notícias desses {{ $json.articles }}\n\n** Resumo claro **\nEscrita limpa, profissional, liguagem legível e resuma em pontos importante\n\n** Inclua links ** \nDepois de cada resumo, adicione a URL para o leitores explorar mais\n\n** Adicione data **\nNo início de cada resumo com a data de hoje:\n{{ $now.format('dd/MM/yyyy') }}",
+        "options": {
+          "systemMessage": "** Formato de saída **\nSomente retorne o resumo e texto puro sem explicações ou formatação adicional."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1040,
+        -48
+      ],
+      "id": "201cd7dd-2fd0-4d0f-b1e7-49bc6a0204dd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        160
+      ],
+      "id": "9a0521b3-1443-4cb1-ab3a-885d89f401d3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8761491718",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1376,
+        -48
+      ],
+      "id": "6d755395-eab5-4c05-ad3f-b5869dda6060",
+      "name": "Send a text message",
+      "webhookId": "605da894-4106-4e9f-86d2-c4d68aa30eae",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZWZDB0Z62ciwtauC",
+          "name": "Nóticias recentes"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Coletando as informações\nNesta parte as informações estão sendo coletadas e duas fontes diferentes e depois estão sendo transformadas para apenas string",
+        "height": 624,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "5503ae15-690c-43fe-9f39-89583eb2e534",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Resumindo as notícias\nNesta parte as notícias estão sendo selecionadas as  10 melhores, resumidas e enviadas ao telegram",
+        "height": 496,
+        "width": 848,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        848,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "90e33b9b-f93d-4e01-b55b-61efef9aead3",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## União das saídas\nAqui este nó está unindo duas informações distintas em apenas um só",
+        "height": 432,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "114ab76d-fb6d-4162-b252-096d7eb54b27",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Noticías 1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notícias 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Noticías 1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notícias 2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "9570ebe8-2b59-4885-8213-a0fc987934b0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "GBtswt5WoQ9Lbz2H",
+  "tags": []
+}
