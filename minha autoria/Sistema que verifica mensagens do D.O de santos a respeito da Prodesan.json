@@ -17,7 +17,7 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.5-flash-lite",
+        "modelName": "models/gemini-3.5-flash",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
@@ -64,9 +64,9 @@
       "parameters": {
         "modelId": {
           "__rl": true,
-          "value": "models/gemini-2.5-flash-lite",
+          "value": "models/gemini-3.5-flash",
           "mode": "list",
-          "cachedResultName": "models/gemini-2.5-flash-lite"
+          "cachedResultName": "models/gemini-3.5-flash"
         },
         "messages": {
           "values": [
@@ -98,8 +98,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 9,
-              "triggerAtMinute": 30
+              "triggerAtHour": 9
             }
           ]
         }
@@ -178,7 +177,8 @@
         "chatId": "8761491718",
         "text": "={{ $json['Resumo da Prodesan'] }}",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
         }
       },
       "type": "n8n-nodes-base.telegram",
@@ -289,7 +289,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -298,7 +298,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "aec9eb76-0eea-4e53-87d0-3c868a79d524",
+  "versionId": "923aea57-a7c8-40f9-bd67-826c4cb2c1ba",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
