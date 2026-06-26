@@ -1,0 +1,281 @@
+{
+  "name": "Transcrever audio em texto",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Sh2Nb63uktigsdZL5h_GukstuMDZqvKW",
+          "mode": "list",
+          "cachedResultName": "loja_pai",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Sh2Nb63uktigsdZL5h_GukstuMDZqvKW"
+        },
+        "event": "fileCreated",
+        "options": {
+          "fileType": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        16
+      ],
+      "id": "bbc9544a-4c3b-4066-b5f5-52adb81e2069",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmIcFuCGOZE8aCef",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "={{ $json.name }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        304,
+        272
+      ],
+      "id": "8a1eb73b-4347-4659-8ae5-c6a3fe959d1f",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EmIcFuCGOZE8aCef",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "binaryPropertyName": "={{ $json.name }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "8381ef5a-4967-4702-8767-5ab29289a538",
+      "name": "Transcribe a recording",
+      "credentials": {
+        "openAiApi": {
+          "id": "90zsNKDbcHVvXOK6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "Instruction:Summarize the audio content into plain text, following the structure below.Rules:The entire summary must not exceed 1500 characters.Include and label all the following sections: title, summary, main_points, action_iteKeep the style clear, concise, and organized.Use short, natural-sounding bullet points for lists.Example formatting:diffCopyEdittitle: Notion Buttonssummary: A collection of buttons for Notion that streamline workflow and save timmain_points:- Overview of Notion buttons- Examples of button use cases- Best practices for setupaction_items:- Test different button templates- Implement buttons in daily workflows- Share templates with teamfollow_up:- Explore advanced button integrations\nAi Audio Transcriber 1\n- Gather team feedback on usage\nstories:\n- A team improved productivity by 30% using custom buttons\nreferences:\n- Official Notion documentation\n- Community tutorials on Notion workflows\narguments:\n- Buttons reduce repetitive tasks\n- Custom buttons enhance flexibility\nrelated_topics:\n- Notion automations\n- Workflow optimization\n- Team collaboration tools\nAi"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        816,
+        224
+      ],
+      "id": "7abc5e16-a5a3-4e87-8cf0-0b3400995e88",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "90zsNKDbcHVvXOK6",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pageId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        -176
+      ],
+      "id": "231b7659-7ff6-4e4b-ae80-d2512f1a8386",
+      "name": "Create a page"
+    },
+    {
+      "parameters": {
+        "content": "## Google Drive - baixando o arquivo\nNeste nó o arquivo é baixado da pasta",
+        "height": 256,
+        "width": 384,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        160
+      ],
+      "typeVersion": 1,
+      "id": "1229d354-4c12-43d2-90e9-ec1ce682b28e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Google Drive - pegando arquivo \nNeste nó é detectado quando um arquivo novo é inserido na pasta configurada",
+        "height": 272,
+        "width": 352,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "5ddf2382-e791-4192-8139-8fc9dbf55873",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## OpenAI\nAqui a IA pega o arquivo baixado(.mp3 ou .wav) e transcreve para texto",
+        "height": 288,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -288
+      ],
+      "typeVersion": 1,
+      "id": "04808b7d-4e02-4de9-a279-cec56a2d6c7c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## OpenAI - devolvendo a mensagem\nA devolutiva de mensagem está sendo feito nesta IA.\nContudo, o seu prompt foi moldado para ajustar a mensagem",
+        "height": 304,
+        "width": 544,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        704,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "0aff5382-40e5-4f78-8bf7-cf18c961314d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "##Notion\nPor fim, a mensagem enviado pela última IA é recebida por este nó, o qual armazena os dados dentro do app Notion",
+        "height": 256,
+        "width": 432,
+        "color": "#BEBBBB"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1056,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "cbefa21a-3489-40e8-91bf-f5a46e18d450",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "00f6ee85-d7b1-4be9-b603-70a1640debcb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15041d284c9cb0d5b99697e4420ff87301988633e824a6fd2035ea6f94cdd72c"
+  },
+  "id": "Egn3kZ8US7BbYkP4",
+  "tags": []
+}
