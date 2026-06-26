@@ -1,0 +1,434 @@
+{
+  "name": "Sistema de currículo com IA",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Avaliador de Curriulos",
+        "formDescription": "Use este formulário para avaliar o seu currículo e se está apto para vaga em questão.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Arquivo",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d3b6eab5-d0b7-4e61-9363-8bcead91f97b",
+      "name": "On form submission",
+      "webhookId": "36f46662-f135-489d-8bab-defaee91f17e"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Arquivo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "aa652eec-ff88-4145-8c58-8dd3ed528ca2",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "schemaType": "manual",
+        "inputSchema": "{ \"type\": \"object\", \"properties\": { \"name\": { \"type\": \"string\" }, \"email\": { \"type\": \"string\", \"format\": \"email\" }, \"phone_number\": { \"type\": \"string\", \"pattern\": \"^(\\\\+\\\\d{1,3}[- ]?)?\\\\d{10}$\" } }, \"required\": [\"name\", \"email\", \"phone_number\"]}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "25ddbc8d-288d-4c06-9c2c-f8f1b2a54b0a",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        640,
+        208
+      ],
+      "id": "d3ae677a-b129-467e-9ea9-ff248cf83567",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Curriculo: {{ $('Extract from File').item.json.text }}",
+        "options": {
+          "systemMessage": "**Objetivo**\nVocê é um Agente de Avaliação e Resumo de Currículos. Sua tarefa é extrair informações chave de um currículo e apresentá-las em um formato claro e estruturado. Você também deve avaliar o quão bem o candidato se encaixa em uma vaga específica e atribuir uma pontuação de relevância (1 a 10), seguida de uma breve justificativa.\n\n**Como funciona**\nAo receber um currículo e a descrição da vaga, siga este processo: \n1. Extrair e Resumir Informações do Currículo\n- Formação Acadêmica: Inclua diplomas, instituições e anos de conclusão.\n- Experiência Profissional: Liste os cargos, nomes das empresas, datas de admissão e demissão e uma frase curta resumindo as principais responsabilidades ou conquistas.\n- Habilidades: Liste as habilidades técnicas, interpessoais ou específicas da vaga — separadas por vírgulas.\n\n2. Avalie o candidato para a vaga\n- Compare as qualificações e a experiência do candidato com os requisitos da vaga.\n- Atribua uma pontuação de 1 a 10 com base na relevância:\n1–3: Baixa adequação\n4–6: Adequação moderada\n7–8: Alta adequação\n9–10: Excelente adequação\n\n- Forneça uma breve justificativa para a pontuação. Mencione os pontos fortes e as lacunas diretamente relacionadas à vaga — sem suposições ou interpretações.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        0
+      ],
+      "id": "1f5aa5b8-43d5-4bc6-a706-2b51c57b7f25",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c58d1567-cfec-4d60-b53c-dcedf89b726c",
+              "name": "curriculo",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "683b022f-7ccf-4d20-a1b0-599118c7f4c3",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.curriculo }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Qualificação Educacional",
+              "description": "Qualidades do profissional quanto a cursos e faculdades"
+            },
+            {
+              "name": "Histórico de trabalho",
+              "description": "É a informação de quantos trabalhos ou projetos participou tanto remunerado quanto voluntário"
+            },
+            {
+              "name": "Habilidades",
+              "description": "São as tecnologias que o candidato tem domínio ou noções"
+            },
+            {
+              "name": "Pontução",
+              "description": "Esta pontuação será a parte fornecida pela IA"
+            },
+            {
+              "name": "Justificativa",
+              "description": "Aqui a IA fará uma explicação do porquê o candidato está apto para o cargo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "c5d608f5-5c84-4dfa-bb33-8e19660ab9d3",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        176
+      ],
+      "id": "9da91423-799c-4252-a5d7-88b2ac67c936",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1e1ma7dW7R2aTvggJN4Dg9OqtfW9TF6LzdVvR-mVahZ4",
+          "mode": "list",
+          "cachedResultName": "Avaliador de Curriculos",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e1ma7dW7R2aTvggJN4Dg9OqtfW9TF6LzdVvR-mVahZ4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1e1ma7dW7R2aTvggJN4Dg9OqtfW9TF6LzdVvR-mVahZ4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "QUALIFICAÇÃO EDUCACIONAL": "={{ $json.output['Qualificação Educacional'] }}",
+            "HISTÓRICO DE TRABALHO": "={{ $json.output['Histórico de trabalho'] }}",
+            "HABILIDADES": "={{ $json.output.Habilidades }}",
+            "PONTUAÇÃO": "={{ $json.output['Pontução'] }}",
+            "JUSTIFICATIVA": "={{ $json.output.Justificativa }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "QUALIFICAÇÃO EDUCACIONAL",
+              "displayName": "QUALIFICAÇÃO EDUCACIONAL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "HISTÓRICO DE TRABALHO",
+              "displayName": "HISTÓRICO DE TRABALHO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "HABILIDADES",
+              "displayName": "HABILIDADES",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PONTUAÇÃO",
+              "displayName": "PONTUAÇÃO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "JUSTIFICATIVA",
+              "displayName": "JUSTIFICATIVA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1744,
+        0
+      ],
+      "id": "ed3f7d0c-5a16-4786-9797-a59e6e54050b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Extract from File": [
+      {
+        "json": {
+          "numpages": 3,
+          "numrender": 3,
+          "info": {
+            "PDFFormatVersion": "1.7",
+            "Language": "pt",
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "Author": "python-docx",
+            "Creator": "Microsoft® Word 2021",
+            "CreationDate": "D:20260130112414-03'00'",
+            "ModDate": "D:20260130112414-03'00'",
+            "Producer": "Microsoft® Word 2021"
+          },
+          "metadata": {
+            "pdf:producer": "Microsoft® Word 2021",
+            "dc:creator": [
+              "python-docx"
+            ],
+            "xmp:creatortool": "Microsoft® Word 2021",
+            "xmp:createdate": "2026-01-30T11:24:14-03:00",
+            "xmp:modifydate": "2026-01-30T11:24:14-03:00",
+            "xmpmm:documentid": "uuid:00E0DF68-9389-4C8C-B125-C13CA709AB3A",
+            "xmpmm:instanceid": "uuid:00E0DF68-9389-4C8C-B125-C13CA709AB3A"
+          },
+          "text": "WILLIAM CAETANO DE SOUZA\nSão Vicente – SP | Q (13) 98847-4371 | william959512@gmail.com\nGitHub: https://github.com/code9-crypto\n🎯 Objetivo Profissional\nAtuar na área de Tecnologia da Informação, com foco em Desenvolvimento de Software e\nSuporte Técnico, contribuindo para soluções inovadoras e eficientes.\n🧩 Resumo Profissional\nProfissional com mais de 5 anos de experiência em TI, atuando com suporte técnico,\nmanutenção de hardware e redes, além de conhecimento prático em desenvolvimento web\ne mobile. Domínio em HTML, CSS, JavaScript, PHP, Java e SQL, com experiência em\nWordPress, Flutter e GitHub. Perfil proativo, organizado e com facilidade para aprender\nnovas tecnologias.\n💼 Experiência Profissional\nProdesan – Santos/SP\nTécnico em Manutenção de Informática | jan/2020 – atual\n• • Suporte a usuários e servidores (computadores, monitores e estabilizadores);\n• • Formatação, configuração e manutenção de rede cabeada e Wi-Fi;\n• • Configuração de e-mails (Outlook, Thunderbird) e atendimento remoto (VNC,\ntelefone).\nOceano Informática – Santos/SP\nTécnico em Informática | mai/2017 – dez/2019\n• • Montagem e manutenção de computadores;\n• • Diagnóstico e resolução de falhas em rede interna da empresa.\nPrefeitura Municipal de São Vicente – São Vicente/SP\nEstagiário de Programação Web | jan/2014 – jan/2016\n• • Atualização e manutenção do site institucional utilizando ASP.NET e banco de dados;\n• • Inserção e gerenciamento de conteúdo via interface web.\n\n🎓 Formação Acadêmica\nUniversidade Paulista (UNIP) – Santos/SP\nGraduação em Gestão da Tecnologia da Informação | jan/2013 – dez/2015\nEscola Técnica Doutora Ruth Cardoso – São Vicente/SP\nTécnico em Informática | jun/2015 – dez/2016\n🧠 Cursos Complementares\n• Python 3+ completo: PySide6, Django, Selenium, Regexp, Testes, TDD, POO, Design\nPatterns GoF, algoritmos e programação – Udemy (cursando)\n• Criação de Apps Android/iOS/Web com Flutter – Udemy\n• Desenvolvimento Web Completo – 20 cursos + 20 projetos – Udemy (2024)\n• Criação de Sites Profissionais com WordPress – Udemy (2024)\n• Java Completo: Programação Orientada a Objetos + Projetos – Udemy\n• Tecnologia da Informação – Microcamp (2011–2013)\n• Redes e Computadores – SENAI (2008–2009)\n🌐 Competências Técnicas\nLinguagens: Java, PHP, HTML, CSS, JavaScript, VB.NET (básico), Python (noções)\nFrameworks: Flutter, Ionic, WordPress\nBanco de Dados: MySQL\nControle de Versão: Git / GitHub\nInfraestrutura: TCP/IP, redes cabeadas e Wi-Fi, montagem e manutenção de PCs\nFerramentas: Pacote Office, Outlook, Thunderbird\n 🗣️Idiomas\nInglês Intermediário (Empire English, Universidade do Inglês, CNA)\n💡 Diferenciais\n• Facilidade para aprendizado de novas linguagens e frameworks\n• Capacidade de trabalho em equipe e atendimento técnico eficiente\n• Interesse em transição gradual para desenvolvimento full stack\n• Atualmente trabalho de forma voluntária em uma ONG a qual tem um site em wordpress:\nhttps://institutocriarparaamar.org\n\n💡 Projetos e Portfólio\n• Projetos desenvolvidos em WordPress disponíveis no GitHub: https://github.com/code9-\ncrypto/curso_desenvolvimento_wordpress/tree/main",
+          "version": "5.3.31"
+        },
+        "binary": {},
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Information Extractor": [
+      {
+        "json": {
+          "output": {
+            "name": "WILLIAM CAETANO DE SOUZA",
+            "email": "william959512@gmail.com",
+            "phone_number": "5551234567"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "2a486243-5744-4c3a-a0d1-f1424a84e461",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "nBh7FvPJMREv4Atw",
+  "tags": []
+}

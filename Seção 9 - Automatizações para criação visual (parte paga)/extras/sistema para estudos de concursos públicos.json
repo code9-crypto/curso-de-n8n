@@ -1,0 +1,178 @@
+{
+  "name": "sistema para estudos de concursos públicos",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "perguntas",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -304,
+        0
+      ],
+      "id": "6907a2c4-b446-4bc3-943b-e123afbc15b0",
+      "name": "Webhook",
+      "webhookId": "37813686-718d-4ca7-b545-41df20a74704"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        352,
+        0
+      ],
+      "id": "e7949e7d-e737-4e5b-b0e2-dbb2b63d28b9",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "description": "** Visão Geral **\nEsta ferramenta deve refletir na questão do usuário e responde-la o mais natural possível, clara e humanizada.\nSinta-se como um assistente inteligente e leve o tempo necessário para pensar antes de responder.\nA resposta final deve ser como ser fosse um ser humano respondendo - suave, casual e de fácil entendimento.\n\n** Não fazer **\nEvite linguagem robotizada ou técnica. Mantenha as coisas simples.\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        192
+      ],
+      "id": "03374908-54ec-45d4-ae15-bf1c586accc2",
+      "name": "inteligente"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-flash-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-flash-latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=** Principal **\nVocê é um especialista em resolver questões de concurso público de qualquer matéria.\n\n** Entrada **\nUse este prompt {{ $json.body.prompt }} para entender e resolver a questão.\n\n** Ferramentas **\nUse ferramenta \"inteligente\" caso precise para responder a questão com a mais precisão possível.\n\n** Resposta **\nA saída da resposta deve ser:\n - Bem formatada e definida. Pode colocar parágrafos, pontuções e espaçamentos para melhor entendimento;\n - Não deve conter símbolos ou caracteres que não possa ser entendida na linguagem humana;\n - Procure palavras fáceis de entedimento ou similares caso não encontre a palavra que se adeque ao texto;\n - Não seja ambíguo e não deixe de forma que possa ter várias interpretações;\n - Seja 100% acertivo e caso não consiga chegar a essa portecentagem então que seja entre 90% e 99%."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "6f9f2faa-dd9b-4e23-9222-cb65f6c24a7c",
+      "name": "solucionador de questões",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Recebe a pergunta \nEste nó recebe a pergunta via POST\nOBS.: a saída é no formato JSON assim:\n\n   body: {\n          prompt: \"\"             \n  }\n",
+        "height": 320,
+        "width": 320,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -384,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "5345ac44-a3a1-44e9-9fc5-1ddf597c5671",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Parte pensante\nNeste nó a IA vai pensar na resposta junto com a ferramenta \"inteligente\" se necessário\n",
+        "height": 464,
+        "width": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "93ee2a9b-fc66-497a-ac6c-c01d20885df4",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Responde para aplicação\nNeste nós o webhook responde para aplicação que solicitou\n",
+        "height": 304,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "ba251e77-179b-4705-9161-ec52411e3328",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "solucionador de questões",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inteligente": {
+      "ai_tool": [
+        [
+          {
+            "node": "solucionador de questões",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "solucionador de questões": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "39da8362-643a-4e45-a95d-74338cddc6a0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "VGx6Slw90tjWX9y9",
+  "tags": []
+}

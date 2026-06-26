@@ -1,0 +1,520 @@
+{
+  "name": "Sistema de automação para novos clientes",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulário para novos clientes",
+        "formDescription": "Preencher todos os campos",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Nome",
+              "placeholder": "Digite seu nome completo",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "email@email.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Ramo da Empresa",
+              "placeholder": "Finanças, Varejo, Têxtil...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "O que deseja alcançar conosco em 5 meses?",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "baccef7e-9088-4bb0-ba17-c615cdae4e04",
+      "name": "Formulario_clientes",
+      "webhookId": "5dcf84a7-701d-4820-ab56-162c57ea3d18"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você pode gerar um e-mail de boas-vindas profissional e acolhedor para um novo cliente? Nome: {{ $json.Nome }}\nE-mail: {{ $json.Email }}\nSetor da Empresa: {{ $json['Ramo da Empresa'] }}\nObjetivos da Parceria: {{ $json['O que deseja alcançar conosco em 5 meses?'] }}\n\nCertifique-se de sempre finalizar o e-mail com a seguinte despedida: \nAtenciosamente, \nBob Bob VP de Relações\nInternas ABC Corp\n\nNão utilize marcadores como [Seu Nome] ou [Suas Informações de Contato] abaixo de Retorne o resultado em 3 campos separados: Assunto: O assunto do e-mail Corpo: O conteúdo principal do e-mail E-mail: {{ $json.Email }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        336,
+        -432
+      ],
+      "id": "b6e52e82-326b-4e63-a136-a12d39b61231",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        336,
+        -272
+      ],
+      "id": "9ebad683-d2e8-4818-9b8f-bcf4b6b7ee65",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -272
+      ],
+      "id": "30f3bf13-0820-4f86-b7ba-f4fe3e3c82da",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Formulário\nAqui o usuário preenche os dados pedidos",
+        "height": 240,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -96
+      ],
+      "typeVersion": 1,
+      "id": "eff34148-2353-4838-8888-51348edd6c4b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Gera o email\nNesta parte o agente de IA gera um email profissional e amigável ao novo cliente",
+        "height": 400,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        176,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "6dbc62db-8d9d-4115-ae58-a583577c8b84",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Extrai os dados\nEste nó extrai apenas os campos: assunto, corpo e email",
+        "height": 400,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        704,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "7217eda3-021a-4d2b-a6b7-fbe7cbcbcae3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "text": "=Analise a consulta JSON {{ $json.output }} e exiba os parâmetros separadamente:\nAssunto\ncorpo\nemail",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"assunto\":\"\",\n  \"corpo\":\"\",\n  \"email\":\"\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -432
+      ],
+      "id": "d8aa95a3-cbb6-4fa3-80e3-1d85b4d8656b",
+      "name": "Extrai os campos"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.output.email }}",
+        "subject": "={{ $json.output.assunto }}",
+        "emailType": "text",
+        "message": "={{ $json.output.corpo }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        -432
+      ],
+      "id": "aebe09b9-f040-4f90-b6b3-bc4a27d42521",
+      "name": "Send a message",
+      "webhookId": "e57f4ec6-ff3d-433c-927a-7753e3e8e10f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Envio do email ao cliente\nEste nó pega os dados do nó anterior( os quais foram extraídos: assunto, corpo e email ) ",
+        "height": 400,
+        "width": 384,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        -528
+      ],
+      "typeVersion": 1,
+      "id": "fd9f1d53-a662-41dd-a6cb-d90e50cce428",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Utilize os dados do cliente abaixo para gerar um resumo claro do perfil dele.\n\nNome:{{ $json.Nome }}\nEmpresa: MSM\nSetor:{{ $json['Ramo da Empresa'] }}\nObjetivos conosco: {{ $json['O que deseja alcançar conosco em 5 meses?'] }}\n\nPreencha os seguintes campos separadamente:\nNome:{{ $json.Nome }}\nE-mail:{{ $json.Email }}\nResumo: Uma visão geral concisa do cliente com base nas informações fornecidas pelo cliente",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        304,
+        112
+      ],
+      "id": "c9416db6-ab07-482d-b5f7-49faa3dcdfe7",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        304,
+        272
+      ],
+      "id": "4cb87125-a37a-4d5b-973e-fad0224e3b7b",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        736,
+        272
+      ],
+      "id": "e085092c-7781-4c74-b342-8863b5910a62",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Extrai os dados\nEste nó extrai apenas os campos: assunto, resumo e email",
+        "height": 400,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        624,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "131cc42d-e82d-4d8d-a75f-fa2abb378199",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "text": "=Analise a consulta JSON {{ $json.output }} e exiba os parâmetros separadamente:\nAssunto\nresumo\nemail",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n  \"assunto\":\"\",\n  \"resumo\":\"\",\n  \"email\":\"\"\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        112
+      ],
+      "id": "6099dda7-ed8f-40d5-acc6-8a53000ce499",
+      "name": "Extrai os campos1"
+    },
+    {
+      "parameters": {
+        "content": "## Gerador de Resumo \nEste agente IA irá gerar um resumo do cliente com base no que ele preencheu no formulário",
+        "height": 400,
+        "width": 352,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "f631401d-3ce2-4245-bce5-a844140d374c",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1XR_uQqB0tsS7hg2Jsgb4MJEkkFoDkyyZly4ts7XSRMg",
+          "mode": "list",
+          "cachedResultName": "Resumo de clientes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XR_uQqB0tsS7hg2Jsgb4MJEkkFoDkyyZly4ts7XSRMg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1XR_uQqB0tsS7hg2Jsgb4MJEkkFoDkyyZly4ts7XSRMg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ASSUNTO": "={{ $json.output.assunto }}",
+            "RESUMO": "={{ $json.output.resumo }}",
+            "EMAIL": "={{ $json.output.email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ASSUNTO",
+              "displayName": "ASSUNTO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "RESUMO",
+              "displayName": "RESUMO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EMAIL",
+              "displayName": "EMAIL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1280,
+        112
+      ],
+      "id": "475a9867-7798-492f-8da0-13f0da63c1f1",
+      "name": "inclui dados na planilha",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Grava dados na planilha\nNesta parte, o resumo que foi criado junto com assunto e email são salvos na planilha do google sheets\n",
+        "height": 400,
+        "width": 416,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        16
+      ],
+      "typeVersion": 1,
+      "id": "2a7cd7d4-34e4-4023-8723-3d7a8c6d9181",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Formulario_clientes": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Extrai os campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extrai os campos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrai os campos": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extrai os campos1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Extrai os campos1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrai os campos1": {
+      "main": [
+        [
+          {
+            "node": "inclui dados na planilha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "dd4b2cd0-2b35-4faa-8d76-8f9c40d3ca08",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "GK6KFzGeYcCyNG5d",
+  "tags": []
+}
