@@ -1,0 +1,584 @@
+{
+  "name": "Sistema para preenchimento de tópicos de estudos",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Explicação de assuntos",
+        "formDescription": "Este formulário vai ser usado para fazer explicações referente a cada tópico de um arquivo PDF",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Arquivo",
+              "fieldType": "file",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -672,
+        -32
+      ],
+      "id": "0bbdc92d-adb8-41e4-a4c4-0f0dbb123c6b",
+      "name": "On form submission",
+      "webhookId": "4efa4ff6-e782-4bd3-af56-4092fce93a1e"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Arquivo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        -32
+      ],
+      "id": "47626b11-0652-4764-ba8f-073d360b2389",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -176
+      ],
+      "id": "80f84204-22d6-432e-b288-6280f5526600",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "** Visão geral **\nVoce é um assistente que refletirá em cada informação que foi repassada a fim de melhorar a escrita do conteúdo para melhor entendimento do estudante;\nNão acrescente informação, você apenas irá melhorar o conteúdo de cada tópico para que o estudante tenha um retenção de informação acima de 90%"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        352
+      ],
+      "id": "08b34989-aa75-41dd-90cf-33321fb47ae1",
+      "name": "inteligente"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1744,
+        -208
+      ],
+      "id": "394ab569-a04d-4e2a-a75d-382400b9abed",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2032,
+        -192
+      ],
+      "id": "009c7de3-ba83-4247-af01-c0711a405508",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Faça requisições para esta fonte a fim de coletar informações pertinentes ao conteúdo de MATEMÁTICA",
+        "url": "https://brasilescola.uol.com.br/matematica",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        896,
+        352
+      ],
+      "id": "c0f752a9-12ca-486b-bd6c-db2e7dc35823",
+      "name": "fonteM"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Faça requisições para esta fonte a fim de coletar informações pertinentes ao conteúdo de PORTUGUÊS",
+        "url": "https://brasilescola.uol.com.br/portugues",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        -176
+      ],
+      "id": "fb92cea8-27d6-4d52-b0b4-0ec1ac360c75",
+      "name": "fonteP"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Faça requisições para esta fonte a fim de coletar informações pertinentes ao conteúdo de LITERATURA",
+        "url": "https://brasilescola.uol.com.br/literatura",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        976,
+        -192
+      ],
+      "id": "5978bfd1-4178-4368-85db-b2d597e32732",
+      "name": "fonteL"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.output }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Lingua Portuguesa",
+              "description": "elementos, assuntos e tópicos referente a lingua portuguesa ou literatura"
+            },
+            {
+              "category": "Matematica",
+              "description": "elementos, assuntos e tópicos referente a matemática"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        -32
+      ],
+      "id": "59bcea80-73c1-4b71-8938-7753dfb14235",
+      "name": "Text Classifier",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        320,
+        128
+      ],
+      "id": "25d33b7a-d220-4f38-a162-80b2d55558c2",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "** Visão geral **\nVoce é um assistente que refletirá em cada informação que foi repassada a fim de melhorar a escrita do conteúdo para melhor entendimento do estudante;\nNão acrescente informação, você apenas irá melhorar o conteúdo de cada tópico para que o estudante tenha um retenção de informação acima de 90%"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "431ffe97-9bdb-45eb-a8a5-5703413887d3",
+      "name": "inteligente1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        752,
+        352
+      ],
+      "id": "d37908a8-6ecd-40f8-bde6-c3d03ef0c71f",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d886fb05-d5c9-4a7e-808c-f248736603d4",
+              "name": "texto",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -32
+      ],
+      "id": "c853c287-61ba-49e4-b579-dafd1b1a6dae",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Portugues",
+              "description": "Todo assunto pertinente á língua portuguesa, português ou similares",
+              "required": true
+            },
+            {
+              "name": "Matematica",
+              "description": "Todo assuntos pertinente ou relacionado à matematica, cálculos, expressões, geometrias(planas e espacial) e equações"
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Você é um especialista que faz a separação de cada subtópico do tópico principal.\nNo final você irá junto todos os subtópicos ao tópico principal, ficando assim:\n\nTÓPICO PRINCIPAL\n- subtópico1\n- subtópico2\n.\n.\n."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -256,
+        -32
+      ],
+      "id": "d570f61d-72b3-4474-81e3-33725eada992",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        128
+      ],
+      "id": "38d2d83e-e9e3-4d1b-bdf1-883d741442af",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "130f9d63-9d34-4ea1-9aeb-5098768844d7",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=** Principal **\nVocê é um especialista em receber os assuntos de estudos e em cada tópico você irá explicar o que é e como resolver cada as questões referentes a esses assuntos;\nos assuntos são esses: {{ $json.output }}\n\n** Ferramentas **\nObrigatóriamente use a ferramenta \"fonteP\" e \"inteligente\" para aprimorar e coletar de uma fonte confiável. Use essas ferramentas para explicar melhor, ter mais precisão em cada conteúdo.\n\n** Formato de saída **\n- Use palavras fáceis de entender;\n- Não seja ambíguo;\n- Não deixe de forma que tenha várias interpertações;\n- Deixe o texto bem formatado, com espaçamento, títulos e subtítulos, negrito;\n- Use exemplos fáceis para melhorar o aprendizado;\n- Seja claro e objetivo;\n- Não inclua textos ou informações extras que não venha agregar para o estudo.\n\n** Desenvolvimento de cada assunto **\n- Faça o desenvolvimento da explicação de cada assunto sem a necessidade de permissão prévia. Assim que obtiver o material necessário para explicação da cada matéria, faça em seguida.\n- Prossegui desta forma em todas as matérias.\n- Destrinche cada tópico de forma clara a objetiva.\n- CONTINUE O PREENCHIMENTO DE CADA ASSUNTO CONFORME A ORDEM NA QUAL RECEBE OS DADOS DO NÓ ANTERIOR.\n- NÃO PARE COM A EXPLANAÇÃO DE CADA ASSUNTO ATÉ FINALIZAR A RELAÇÃO DE TODOS OS TÓPICOS RECEBIDOS.\n- CONTINUE A EXPLICAÇÃO SEM PEDIR \"ORDEM DE CONTINUAÇÃO\" OU \"POR ONDE DEVO CONTINUAR\". APENAS CONTINUE CONFORME A ORDEM DE ASSUNTOS RECEBIDOS.\n\n** Conclusão **\n- Faça todos os tópicos obtidos do NÓ anterior.\n- Não faça resumos desnecessários. Caso haja algum assunto que possa ser resumido, mas que não venha perder o sentido dos estuso, então pode fazer.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        768,
+        -416
+      ],
+      "id": "dbdafe87-dff9-428f-98c9-f10121966661",
+      "name": "Agente de IA para português"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=** Principal **\nVocê é um especialista em receber os assuntos de estudos e em cada tópico você irá explicar o que é e como resolver cada as questões referentes a esses assuntos;\nos assuntos são esses: {{ $json.output }}\n\n** Ferramentas **\nObrigatóriamente use as ferramentas \"fonteM\" e \"inteligente\" para aprimorar e coletar de uma fonte confiável. Use essas ferramentas para explicar melhor, ter mais precisão em cada conteúdo.\n\n** Formato de saída **\n- Use palavras fáceis de entender;\n- Não seja ambíguo;\n- Não deixe de forma que tenha várias interpertações;\n- Deixe o texto bem formatado, com espaçamento, títulos e subtítulos, negrito;\n- Use exemplos fáceis para melhorar o aprendizado;\n- Seja claro e objetivo;\n- Não inclua textos ou informações extras que não venha agregar para o estudo.\n\n** Desenvolvimento de cada assunto **\n- Faça o desenvolvimento da explicação de cada assunto sem a necessidade de permissão prévia. Assim que obtiver o material necessário para explicação da cada matéria, faça em seguida.\n- Prossegui desta forma em todas as matérias.\n- Destrinche cada tópico de forma clara a objetiva.\n- CONTINUE O PREENCHIMENTO DE CADA ASSUNTO CONFORME A ORDEM NA QUAL RECEBE OS DADOS DO NÓ ANTERIOR.\n- NÃO PARE COM A EXPLANAÇÃO DE CADA ASSUNTO ATÉ FINALIZAR A RELAÇÃO DE TODOS OS TÓPICOS RECEBIDOS.\n- CONTINUE A EXPLICAÇÃO SEM PEDIR \"ORDEM DE CONTINUAÇÃO\" OU \"POR ONDE DEVO CONTINUAR\". APENAS CONTINUE CONFORME A ORDEM DE ASSUNTOS RECEBIDOS.\n\n** Conclusão **\n- Faça todos os tópicos obtidos do NÓ anterior.\n- Não faça resumos desnecessários. Caso haja algum assunto que possa ser resumido, mas que não venha perder o sentido dos estuso, então pode fazer.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        816,
+        192
+      ],
+      "id": "c932d3e9-706d-4224-ab84-c15c4e20b5f8",
+      "name": "Agente de IA para matematica"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1472,
+        -208
+      ],
+      "id": "f7646af1-1115-4e7d-95a7-eb93660b10bd",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de IA para português",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inteligente": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA para matematica",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fonteM": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA para matematica",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fonteP": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA para português",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "fonteL": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA para português",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Agente de IA para português",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente de IA para matematica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "inteligente1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de IA para português",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de IA para matematica",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de IA para matematica": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Agente de IA para português": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c0608fb6-0be8-4abb-b0f1-be0ca22ac44c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "I53ltupz392eVuzS",
+  "tags": []
+}

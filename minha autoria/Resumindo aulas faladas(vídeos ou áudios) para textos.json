@@ -1,0 +1,312 @@
+{
+  "name": "Resumindo aulas faladas(vídeos ou áudios) para textos",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Envio de video",
+        "formDescription": "Este formulário será usado para receber um arquivo no formato .mp3 ou .mp4 e usado para transcrever todo o áudio em texto",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Arquivo",
+              "fieldType": "file"
+            },
+            {
+              "fieldLabel": "URL do vídeo ou áudio"
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -368,
+        48
+      ],
+      "id": "b1199325-59b6-4996-8d15-a0287e78b36b",
+      "name": "Formulario",
+      "webhookId": "8d9674b0-a43b-41ac-8ec6-0edec89c88e3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "9b346a92-171c-42f8-91c7-940b14a3ea2f",
+              "leftValue": "={{ $json.Arquivo[0] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        48
+      ],
+      "id": "ddd7f410-9d16-4631-bb76-771cad802fbe",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "binaryPropertyName": "Arquivo",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        -112
+      ],
+      "id": "4c60ce4d-afa2-40f4-8291-778ccd22d4b7",
+      "name": "Transcrever por arquivo",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "audioUrls": "={{ $('Formulario').item.json['URL do vídeo ou áudio'] }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        176
+      ],
+      "id": "dbc20221-ebef-4d28-b822-cbd4d827dea8",
+      "name": "Transcrever por URL",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Q5CDp0Xv7oRhrNDc",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "output",
+        "binaryPropertyName": "text",
+        "options": {
+          "encoding": "utf8"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1696,
+        32
+      ],
+      "id": "38c5031a-ad25-4af9-a87e-65fa0cd631f1",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        864,
+        32
+      ],
+      "id": "be635321-421c-488b-9291-a7a3917298c1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        192
+      ],
+      "id": "6e2a8a2c-9211-4add-b100-56d9b9df8b90",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Você é um assistente acostumado a ler documentos e fazer resumos de material de estudos de tal modo que qualquer um (seja qual a for a escolaridade) consegue entender.\nSe for necessário releia todo o material para de forma bem clara."
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        192
+      ],
+      "id": "389f2b1d-d438-462a-af30-f30c627aee54",
+      "name": "assistente"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.content.parts[0].text }}",
+        "options": {
+          "systemMessage": "** Principal **\nVocê um agente especialista e resumo de conteúdo para estudos;\nCom base no texto recebido quero que faça o seguinte:\n- Retire textos que não são relevantes ao estudos;\n- Se houver partes onde estiver escrito coisas como: nome do professor ou apresentações desnecessárias, retire do texto;\n- Use a ferramenta \"assistente\" para te auxiliar na hora de fazer o resumo;\n- Caso o texto esteja com caracteres especiais desconfigurados, configure-os para que seja entendível em linguagem humana;\n- Não use linguagem muito técnica, seja claro e objetivo.\n- Não Use linguagem robotizada.\n- Mantenha um texto limpo, com formatação, pontuação e acentuação adequada.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1216,
+        32
+      ],
+      "id": "c03af455-7a91-4a7a-b9bb-1bb9da3ef413",
+      "name": "Especialista em resumo"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Formulario": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Transcrever por arquivo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transcrever por URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever por arquivo": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcrever por URL": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Especialista em resumo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Especialista em resumo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "assistente": {
+      "ai_tool": [
+        [
+          {
+            "node": "Especialista em resumo",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Especialista em resumo": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fef2d5bf-ae8a-48d7-b25c-bcf822eb1831",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "I6wP2dopVgPX9w3z",
+  "tags": []
+}
