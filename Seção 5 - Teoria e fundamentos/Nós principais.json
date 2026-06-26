@@ -1,0 +1,305 @@
+{
+  "name": "Nós principais",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "bcac6309-c57b-467e-b059-6b870f2a5957",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -400,
+        -32
+      ],
+      "id": "02444dcc-a6fa-43ec-a230-50d971eab370",
+      "name": "Webhook",
+      "webhookId": "bcac6309-c57b-467e-b059-6b870f2a5957"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "56b2bf1c-d69a-4e8b-b7ff-8e6e00a40c63",
+              "name": "",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "4cc23c8d-46a6-463b-8ae2-2239575213c3",
+              "name": "",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "1a2365c8-ec89-4ca8-8963-cd6da70ad283",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        304,
+        -64
+      ],
+      "id": "34a85176-e37e-4375-944b-23a6a2f591a4",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "02b9b0bc-616c-4804-bd63-f37e5a34df1a",
+              "leftValue": "a",
+              "rightValue": "a",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "81504d8a-9957-48d9-a17a-5c57d0fc43d8",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        -80
+      ],
+      "id": "0760ee5d-4cb7-42a6-921f-c525397d2eeb",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "57523194-520d-442e-9a11-81299965dbfd"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "beae8106-d6c4-44ec-9990-01823aa7ccdf",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0e3bdd08-153b-44d2-9687-3fd2bd179b4c",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -384,
+        208
+      ],
+      "id": "055442ea-d80c-483e-9c25-bef68f97f62c",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        192
+      ],
+      "id": "4ec1e59d-ec54-4647-a9c3-51ab12b5a105",
+      "name": "Merge"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        208
+      ],
+      "id": "5e2704dc-a46c-4dfd-8c5d-675ad40b2796",
+      "name": "Wait",
+      "webhookId": "7d2845fb-b981-4899-872c-6b9cff8100a8"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# Loop over input items and add a new field called 'my_new_field' to the JSON of each one\nnomes = [\"william\",\"Ester\",\"Hadassa\"]\nfor nome in nomes:\n  print(nome)"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        192
+      ],
+      "id": "deb1c315-f1cd-4934-b1b3-bf403dba2f42",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        880,
+        64
+      ],
+      "id": "9dc5abc5-aa46-4cdd-b2cb-1d880533bf5b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "content": "## Nós mais usados nas automações\n\n",
+        "height": 656,
+        "width": 1712
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -496,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "8a5f1c3b-5957-42fc-8fbe-6fffb75a3793",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        []
+      ]
+    },
+    "Merge": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        []
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ebbfa75c-28c9-4071-a223-0f827fbfd6b5",
+  "meta": {
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "9nrC5u2HmWKmwvoj",
+  "tags": []
+}
