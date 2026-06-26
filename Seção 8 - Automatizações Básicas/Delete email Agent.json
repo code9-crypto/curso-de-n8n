@@ -1,0 +1,250 @@
+{
+  "name": "Delete email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "- Starts the workflow every day at 8 AM.\n- Adjust the time if you want the workflow to run at a different hour.",
+        "height": 314.47468983163634,
+        "width": 248.47086922498647
+      },
+      "id": "66a973ee-6dba-4d32-8dd7-4c61db618d98",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -880,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Fetches all emails received in the past from the email address",
+        "height": 313.40934714314244,
+        "width": 213.36643278764896
+      },
+      "id": "78b82d51-e091-427e-b1b4-1965ce5e580c",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -592,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "specifiedFields",
+        "fieldsToInclude": "id, snippet",
+        "options": {}
+      },
+      "id": "1974a219-c0be-4766-8f41-e8ae410fa0a1",
+      "name": "Organize Email Data - Morning",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -304,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Organizes the fetched email data, extracting fields like sender, receiver, CC, and a preview snippet.",
+        "height": 305.83657700487913,
+        "width": 226.7095107678671
+      },
+      "id": "6d6eef1b-de35-4c93-89e2-c9bd60020f0a",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "-Delete all messages\n",
+        "height": 248,
+        "width": 233
+      },
+      "id": "cc8a2d46-baf3-48db-b029-a7a4ee6ff046",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemma-4-26b-a4b-it",
+          "mode": "list",
+          "cachedResultName": "models/gemma-4-26b-a4b-it"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Go through this email summary and identify all key details mentioned, any specific issues to look at, and action items.\nUse this format to output\n{\n  \"summary_of_emails\": [\n    \"Point 1\",\n    \"Point 2\",\n    \"Point 3\"\n  ],\n  \"actions\": [\n    {\n      \"name\": \"Name 1\",\n      \"action\": \"Action 1\"\n    },\n    {\n      \"name\": \"Name 1\",\n      \"action\": \"Action 2\"\n    },\n    {\n      \"name\": \"Name 2\",\n      \"action\": \"Action 3\"\n    }\n  ]\n}\n\nInput Data:\n\n {{ $json.data.toJsonString() }}\n\n"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -80,
+        144
+      ],
+      "id": "d9717c0c-d483-4b8d-8698-f2cd994b2068",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "TBmVFBPi65KHKz72",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 5,
+        "filters": {
+          "readStatus": "read"
+        }
+      },
+      "id": "4c5be75f-a545-45e5-908b-ced5c0961b13",
+      "name": "Fetch Emails Past",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -544,
+        144
+      ],
+      "webhookId": "20f1d11d-8a69-43f3-9323-33eaf1b3b600",
+      "typeVersion": 2.1,
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "b98db1c5-8e12-45e0-85e7-f084aca84982",
+      "name": "Daily 8AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -800,
+        144
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $('Organize Email Data - Morning').item.json.data[1].id }}"
+      },
+      "id": "765ae0ba-c3d8-41b0-b64f-b4519d69c4a4",
+      "name": "Delete messages",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        304,
+        144
+      ],
+      "webhookId": "83f2aeb9-7b6c-4336-b5ed-8acfcd259850",
+      "typeVersion": 2.1,
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "y6KXmt4SKsEJPbwc",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Organize Email Data - Morning": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Delete messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Emails Past": {
+      "main": [
+        [
+          {
+            "node": "Organize Email Data - Morning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 8AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Emails Past",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete messages": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "05648190-793d-40be-b345-4974d527ed88",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "YPsq0LQcM8Z0dwf3",
+  "tags": []
+}

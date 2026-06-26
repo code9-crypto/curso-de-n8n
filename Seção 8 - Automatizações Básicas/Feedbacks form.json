@@ -1,0 +1,165 @@
+{
+  "name": "Feedbacks form",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Formulário de feedbacks",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Primeiro nome?"
+            },
+            {
+              "fieldLabel": "Qual seu email?"
+            },
+            {
+              "fieldLabel": "Informe-nos seu feedback",
+              "fieldType": "dropdown",
+              "fieldName": "Selecione uma opção",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Perfeito"
+                  },
+                  {
+                    "option": "Bom"
+                  },
+                  {
+                    "option": "Neutro"
+                  },
+                  {
+                    "option": "Ruim"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Deixe seu comentário",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2d4e6800-dfe5-47a1-89d2-47d37f85e00e",
+      "name": "On form submission",
+      "webhookId": "24544cfa-d3fb-43f5-8813-4c1daf501d9c"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1-onrJYBCiq6P4D9BqzL9TCO4uIE9yE9xSR0esyb5Bvw",
+          "mode": "list",
+          "cachedResultName": "Coleta de feedbacks",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-onrJYBCiq6P4D9BqzL9TCO4uIE9yE9xSR0esyb5Bvw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Dados",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-onrJYBCiq6P4D9BqzL9TCO4uIE9yE9xSR0esyb5Bvw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ $json['Primeiro nome?'] }}",
+            "Email": "={{ $json['Qual seu email?'] }}",
+            "Feedback": "={{ $json['Selecione uma opção'] }}",
+            "Comentario": "={{ $json['Deixe seu comentário'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Nome",
+              "displayName": "Nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Feedback",
+              "displayName": "Feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Comentario",
+              "displayName": "Comentario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d90a0137-58a9-402a-af6f-6a33c4ac0270",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dV3jFbjv9Ox9on77",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4a44e611-047a-46cf-ad30-3e21fb1db3eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "xC7xS9VKxgkq8Z5L",
+  "tags": []
+}
