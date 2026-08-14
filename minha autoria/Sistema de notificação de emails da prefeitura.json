@@ -1,0 +1,211 @@
+{
+  "name": "Sistema de notificação de emails da prefeitura",
+  "nodes": [
+    {
+      "parameters": {
+        "format": "resolved",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        -416,
+        -64
+      ],
+      "id": "115e704d-2870-4a68-82cb-263f009620cb",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "lD03APk83rGRl0Qu",
+          "name": "Emails da Prodesan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0c0943a-2acd-4f9d-983b-cb40088339c3",
+              "name": "Remetente",
+              "value": "={{ $json.headers.from }}",
+              "type": "string"
+            },
+            {
+              "id": "c7d6d18a-eace-424c-b858-e680c97154c8",
+              "name": "Assunto",
+              "value": "={{ $json.headers.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "e8c46750-91fb-4480-a73b-7bab6d700407",
+              "name": "Corpo da Email",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "7c082777-d402-4e69-9db3-3b1bea66b61c",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.Remetente }}{{ $json.Assunto }}{{ $json['Corpo da Email'] }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Nome do Remente",
+              "description": "Extrai exclusivamente o nome do remetente e sem nenhum informação a mais",
+              "required": true
+            },
+            {
+              "name": "Assunto",
+              "description": "Extraia exclusivamente o assunto e sem nenhum informação a mais",
+              "required": true
+            },
+            {
+              "name": "Texto",
+              "description": "Extraia exclusivamente o corpo do email e sem nenhuma outra informação a mais. E se aparecer um texto com este inicio: O teor deste e-mail pode ser confidencial, restrito e/ou sigiloso... Remova-o"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        -64
+      ],
+      "id": "4625f0f5-149a-4ac0-a7c4-550a55dcb3a9",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        16,
+        144
+      ],
+      "id": "058e5cdf-0f80-4a2b-9ad5-ff56934cc190",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8761491718",
+        "text": "=Remetente: {{ $json.output['Nome do Remente'] }}\n\nAssunto: {{ $json.output.Assunto }}\n\nCorpo do email: {{ $json.output.Texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        -64
+      ],
+      "id": "68eaf925-b5de-462d-9c6a-5469e8213b79",
+      "name": "Send a text message",
+      "webhookId": "ff3a67a0-d1f0-4084-bba6-dabb147167d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "2kMEBPO2GbfmCHDr",
+          "name": "Novos emails da Prefeitura"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Sistema de notificação de Email da Prefeitura\n",
+        "height": 416,
+        "width": 1136,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "414f2f54-8187-4759-b053-a5e118abaa53",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "93fcd3ad-1565-4e3d-abc3-9136152fd8d8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "k5Lrk5Z1z2vURhPF",
+  "tags": []
+}

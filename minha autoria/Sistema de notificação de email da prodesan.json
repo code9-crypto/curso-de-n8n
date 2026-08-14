@@ -1,0 +1,210 @@
+{
+  "name": "Sistema de notificação de email da prodesan",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f0c0943a-2acd-4f9d-983b-cb40088339c3",
+              "name": "Remetente",
+              "value": "={{ $json.headers.from }}",
+              "type": "string"
+            },
+            {
+              "id": "c7d6d18a-eace-424c-b858-e680c97154c8",
+              "name": "Assunto",
+              "value": "={{ $json.headers.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "e8c46750-91fb-4480-a73b-7bab6d700407",
+              "name": "Corpo da Email",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -112,
+        -48
+      ],
+      "id": "2b2e085d-af3f-4ce6-afdb-762d0f53ecf3",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.Remetente }}{{ $json.Assunto }}{{ $json['Corpo da Email'] }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Nome do Remente",
+              "description": "Extrai exclusivamente o nome do remetente e sem nenhum informação a mais",
+              "required": true
+            },
+            {
+              "name": "Assunto",
+              "description": "Extraia exclusivamente o assunto e sem nenhum informação a mais",
+              "required": true
+            },
+            {
+              "name": "Texto",
+              "description": "Extraia exclusivamente o corpo do email e sem nenhuma outra informação a mais. E se aparecer um texto com este inicio: O teor deste e-mail pode ser confidencial, restrito e/ou sigiloso... Remova-o"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        144,
+        -48
+      ],
+      "id": "7e89d507-a97c-40b7-b02f-b106fb0c9aa2",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        80,
+        160
+      ],
+      "id": "5588e0e6-9a3e-4103-9284-a1789747c03c",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "pztNalzherpeObbT",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8761491718",
+        "text": "=Remetente: {{ $json.output['Nome do Remente'] }}\n\nAssunto: {{ $json.output.Assunto }}\n\nCorpo do email: {{ $json.output.Texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        -48
+      ],
+      "id": "3893f58f-2b37-45f6-9e78-27fff94d0b58",
+      "name": "Send a text message1",
+      "webhookId": "ff3a67a0-d1f0-4084-bba6-dabb147167d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "VDj9c8Xt4ETA1Cap",
+          "name": "Email da Prodesan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Sistema de notificação de Email da Prodesan\n",
+        "height": 416,
+        "width": 1136,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -432,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "e7acd934-dc87-40cb-a51c-5ecb092da5c6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "format": "resolved",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2.1,
+      "position": [
+        -352,
+        -48
+      ],
+      "id": "12c276e1-122c-404d-a392-a209b30afae3",
+      "name": "Email Trigger (IMAP)",
+      "credentials": {
+        "imap": {
+          "id": "lD03APk83rGRl0Qu",
+          "name": "Emails da Prodesan"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5404efbf-662f-4238-8e1a-e291847c629d",
+  "meta": {
+    "instanceId": "3fd26f5f29214d3e3ea19c02ed4f88cb9b3fdf4353aaad6c6586848aa4783893"
+  },
+  "id": "iOMJoAMeqEhCwjh2",
+  "tags": []
+}
