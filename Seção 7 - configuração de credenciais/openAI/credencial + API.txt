@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 conta: convidadoc38@gmail.com
 
+=======
+conta: convidadoc38@gmail.com
+
+>>>>>>> c0160719fa54a9cccb29773f6988c876068b09fa
 API: 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

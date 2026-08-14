@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 conta: convidadoc38@gmail.com
+=======
+conta: convidadoc38@gmail.com
+>>>>>>> c0160719fa54a9cccb29773f6988c876068b09fa
 API: patFQbFxokacONp59.bcdd3e71140c29fe050420712aa66a9d49274f3406a5028dbf694b5342812904

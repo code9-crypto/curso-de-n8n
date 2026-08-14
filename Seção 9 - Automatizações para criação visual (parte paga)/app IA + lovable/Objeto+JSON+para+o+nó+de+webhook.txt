@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 [
   {
     "body": {
       "prompt": " a raccoon DJ at a rooftop party"
     }
   }
+=======
+[
+  {
+    "body": {
+      "prompt": " a raccoon DJ at a rooftop party"
+    }
+  }
+>>>>>>> c0160719fa54a9cccb29773f6988c876068b09fa
 ]
